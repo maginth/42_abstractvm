@@ -1,30 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   AInstruction.hpp                                   :+:      :+:    :+:   */
+/*   Avm.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2015/02/09 17:30:02 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/09 17:52:17 by mguinin          ###   ########.fr       */
+/*   Created: 2015/02/10 13:19:51 by mguinin           #+#    #+#             */
+/*   Updated: 2015/02/10 17:55:51 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 
-class AInstruction {
+#define OPINT unsigned char; 
+
+class Avm {
 public:
-	AInstruction(void);
-	AInstruction(AInstruction const & src);
-	virtual ~AInstruction(void);
+	Avm(void);
+	Avm(Avm const & src);
+	virtual ~Avm(void);
 
-	AInstruction &		operator=(AInstruction const & rhs);
+	Avm &		operator=(Avm const & rhs);
+
+	void		run();
+	void		exit();
 	
-	void	exec( void ) const = 0;
-
 private:
-	std::string	const	_name;
-	bool const			_need_value
+	IOperand	*_stack;
+	Instruction	*_first;
 };
 
-std::ostream &	operator<<(std::ostream & stream, AInstruction const & s);
+std::ostream &	operator<<(std::ostream & stream, Avm const & s);

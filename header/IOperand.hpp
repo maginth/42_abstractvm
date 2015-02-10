@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:37:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/09 16:39:59 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/10 17:53:54 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,19 @@ public:
 	virtual IOperand const * operator*( IOperand const & rhs ) const = 0; // Product
 	virtual IOperand const * operator/( IOperand const & rhs ) const = 0; // Quotient
 	virtual IOperand const * operator%( IOperand const & rhs ) const = 0; // Modulo
+	virtual bool			 operator==( IOperand const & rhs ) const = 0;
+	virtual IOperand const * upgrade(IOperand::*cast) const = 0;
 
 	virtual std::string const & toString( void ) const = 0; // String representation of the instance
-
+	virtual void				dump( void ) const = 0;
+	virtual IOperand *			pop( void ) const = 0;
+	virtual IOperand *			push(IOperand *prev) const = 0;
+	virtual void				empty_stack( void ) = 0;
 	virtual ~IOperand( void ) {}
 
 protected:
 	template<typename TYPE>
 	virtual operator TYPE() const = 0;
+
 
 };
