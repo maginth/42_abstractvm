@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:43:15 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/10 19:37:52 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/11 12:57:19 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,15 @@ public:
 	static string		eOperandTypeString[] = 
 		{"Int8", "Int16", "Int32", "Float", "Double", NULL};
 
-	enum eOpCode = {Push, Pop, Dump, Assert, Add, Sub, Mul, Div, Mod, Print, Exit};
-	static string		eOpCodeString[] = 
-		{"push", "pop", "dump", "assert", "add", "sub", "mul", "div", "mod", "print", "exit", NULL};
+
+	static IOperand const * (Factory::create_func const)(std::string const & value)[] =
+	{
+		&Factory::createInt8,
+		&Factory::createInt16,
+		&Factory::createInt32,
+		&Factory::createFloat,
+		&Factory::createDouble,
+	};
 
 	Factory(void);
 	virtual ~Factory(void);

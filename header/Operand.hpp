@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:48:16 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/10 17:54:00 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/11 14:08:24 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,7 @@ public:
 	Operand<TYPE, ETYPE>(Operand<TYPE, ETYPE> const & src);
 
 	Operand<TYPE, ETYPE>(TYPE value) :
-		_value(value),
-	 	_cast(&IOperand::TYPE
+		_value(value)
 	{}
 
 	virtual ~Operand<TYPE, ETYPE>(void)
@@ -96,31 +95,14 @@ public:
 		return (res.str());
 	}
 
-	virtual void				dump( void ) const
+	virtual int			const 	opSize( void ) const
 	{
-		std::cout << s << std::endl;
-		this->_prev->dump();
+		return sizeof(Operand);
 	}
 
-	virtual IOperand *			pop( void ) const
+	void *				Operand::operator new(std::size_t size)
 	{
-		IOperand *				res;
-
-		res = _prev;
-		return _prev;
-	}
-
-	virtual void				empty_stack( void )
-	{
-		if (_prev)
-			_prev->empty_stack();
-		delete this;
-	}
-
-	virtual IOperand *			push(IOperand *prev) const
-	{
-		_prev = prev;
-		return this;
+		return Avm::reserveStack(int size);
 	}
 
 	virtual ~IOperand( void ) {}

@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 16:46:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/10 19:32:53 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/11 12:55:59 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,21 +52,7 @@ IOperand const ** Factory::readOperand( std::istream const & s ) const
 
 IOperand const * Factory::createOperand( Factory::eOperandType type, std::string const & value ) const
 {
-	switch(type)
-	{
-		case Int8 :
-			return createInt8(value);
-		case Int16 :
-			return createInt16(value);
-		case Int32 :
-			return createInt32(value);
-		case Float :
-			return createFloat(value);
-		case Double :
-			return createDouble(value);
-		default :
-			return NULL;
-	}
+	this->*(Factory::create_func[type])(value);
 }
 
 Factory::eOpCode	Factory::readOpcode(std::istream const & s )
@@ -93,27 +79,27 @@ Instruction const * Factory::createInstruction(std::istream const & s ) const
 	switch(readOpcode(s))
 	{
 		case Push :
-			return new Instr<Push,1>(&(arg = readOperand()));
+			return new Instr<Push,1>(readOperand());
 		case Pop :
-			return new Instr<Pop,0>();
+			return new Instr<Pop>();
 		case Dump :
-			return new Instr<Dump,0>();
+			return new Instr<Dump>();
 		case Assert :
-			return new Instr<Assert,1>(&(arg = readOperand()));
+			return new Instr<Assert,1>(readOperand());
 		case Add :
-			return new Instr<Add,0>();
+			return new Instr<Add>();
 		case Sub :
-			return new Instr<Sub,0>();
+			return new Instr<Sub>();
 		case Mul :
-			return new Instr<Mul,0>();
+			return new Instr<Mul>();
 		case Div :
-			return new Instr<Div,0>();
+			return new Instr<Div>();
 		case Mod :
-			return new Instr<Mod,0>();
+			return new Instr<Mod>();
 		case Print :
-			return new Instr<Print,0>();
+			return new Instr<Print>();
 		case Exit :
-			return new Instr<Exit,0>();
+			return new Instr<Exit>();
 	}
 }
 

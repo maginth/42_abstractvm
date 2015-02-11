@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/10 13:23:32 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/10 18:30:14 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/11 11:13:49 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,15 +18,16 @@ public:
 	void		exec(IOperand	* stack) const = 0;
 };
 
-template<Factory::eOpCode OPCODE, int OP_NB>
-class Instr : Instructions {
+template<Factory::eOpCode OPCODE, int OP_NB = 0>
+class Instr : Instr<OPCODE, OP_NB - 1> {
 public:
 	Instr<OPCODE, OP_NB>(void);
-	Instr<OPCODE, OP_NB>(IOperand **operand)
-	{
-		for (int i = 0; i < OP_NB; i++)
-			_operand[i] = operand[i];
-	}
+
+	template<class IOP, class... IOP_LISTE>
+	Instr<OPCODE, OP_NB>(IOP operand, IOP_LISTE op_next) :
+		Instr<OPCODE, OP_NB - 1>(op_next...),
+		_operand(operand)
+	{}
 
 	virtual ~Instr<OPCODE, OP_NB>(void) {}
 
@@ -35,7 +36,7 @@ public:
 private:
 	Instr<OPCODE, OP_NB>(Instructions const & src);
 
-	IOperand *		_operand[OP_NB];
+	IOperand		_operand;
 };
 
 template<Factory::eOpCode OPCODE>
