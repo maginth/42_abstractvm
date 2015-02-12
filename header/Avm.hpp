@@ -6,15 +6,14 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/10 13:19:51 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/11 14:30:43 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/12 21:17:58 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
-#define STACK_SIZE 
+#define DATA_MAX_SIZE 10000000
 typedef unsigned char byte;
 
-#define OPINT unsigned char; 
 
 class Avm {
 public:
@@ -22,14 +21,14 @@ public:
 	Avm(Avm const & src);
 	virtual ~Avm(void);
 
-	enum eOpCode = {Push, Pop, Dump, Assert, Add, Sub, Mul, Div, Mod, Print, Exit};
-	static string const		eOpCodeString[] = 
-		{"push", "pop", "dump", "assert", "add", "sub", "mul", "div", "mod", "print", "exit", NULL};
+	enum eOpCode = {Push, Pop, Dump, Assert, Add, Sub, Mul, Div, Mod, Print, Exit};	
 
 	Avm &		operator=(Avm const & rhs);
 
-	void			run();
-	inline void		reserveStack(int const size);
+	void					run();
+	void					instruction_loop();
+	inline static void		reserveStack(int const size);
+	inline void				data_mode(bool);
 	
 private:
 	IOperand	*_stack;
@@ -41,6 +40,7 @@ private:
 	eOpCode		*_instruction;
 	
 	int			_line;
+	static Avm *	_data_mode_avm;
 };
 
 std::ostream &	operator<<(std::ostream & stream, Avm const & s);

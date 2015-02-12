@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/11 12:58:22 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/11 14:29:40 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/12 21:20:02 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,11 @@ Avm::~Avm(void)
 inline void	* Avm::reserveStack(int const size)
 {
 	byte	*res;
+	Avm		&avm = *Avm::_data_mode_avm;
 
-	byte = _stack;
-	_stack += size;
-	if (_stack > _stack_end)
+	res = avm._stack;
+	avm._stack += size;
+	if (avm._stack > avm._stack_end)
 		throw AvmStackOverflow();
 	return res;
 }
@@ -43,13 +44,34 @@ void	Avm::push()
 	reinterpret_cast<byte *>(_data_segment) -= _data_segment->opSize();
 }
 
-void		Avm::run()
+
+void	Avm::data_mode(bool data_mode)
 {
-	while(_instruction != Exit)
+	int	size;
+
+	if (data_mode)
 	{
-		_line++;
+		size = DATA_MAX_SIZE;
+		Avm::_data_mod_avm = this;
 	}
+	else
+	{
+		_data_segment = static_cast<IOperand *>
+			(realloc(_stack_start, (int)(_stack - _stack_start)));
+		size = _line * sizeof(Operand<double, Double>);
+		Avm::_data_mode_avm = NULL;
+	}
+	_line = 0;
+	_stack_start =
+	_stack = static_cast<IOperand *>(new byte[size]);
+	_stack_end = static_cast<IOperand *>(static_cast<byte *>_stack + size);
 }
+
+void	Avm::write_instruction(eOpcode opcode)
+{
+	_instruction[_line++] = opcode;
+}
+
 
 template<IOperand * (IOperand::*FUNC)(IOperand &)>
 void binary_op()
@@ -67,15 +89,31 @@ void binary_op()
 }
 
 
-static		(Avm::*stack_operation)( void )[]
+void		Avm::instruction_loop()
 {
-	&Avm::push,
-	&Avm::pop,
-	&Avm::dump,
-	&Avm::Assert,
-	&Avm::binary_op<&IOperand::operator+>,
-	&Avm::binary_op<&IOperand::operator->,
-	&Avm::binary_op<&IOperand::operator*>,
-	&Avm::binary_op<&IOperand::operator/>,
-	&Avm::binary_op<&IOperand::operator%>
+	static		(Avm::*instr_list)( void )[]
+	{
+		&Avm::push,
+		&Avm::pop,
+		&Avm::dump,
+		&Avm::Assert,
+		&Avm::binary_op<&IOperand::operator+>,
+		&Avm::binary_op<&IOperand::operator->,
+		&Avm::binary_op<&IOperand::operator*>,
+		&Avm::binary_op<&IOperand::operator/>,
+		&Avm::binary_op<&IOperand::operator%>
+	}
+
+	while(_instruction != Exit)
+	{
+		instr_list[_instruction++];
+		_line++;
+	}
+}
+
+
+void		Avm::run()
+{
+	_line = 0;
+
 }

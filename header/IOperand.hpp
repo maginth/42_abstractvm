@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:37:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/11 13:42:30 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/12 19:39:10 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,10 @@ public:
 	virtual int			const 	opSize( void ) const = 0;
 	virtual ~IOperand( void ) {}
 
-protected:
-	template<typename TYPE>
-	virtual operator TYPE() const = 0;
-
+	virtual operator int8_t() const;
+	virtual operator int16_t() const;
+	virtual operator int32_t() const;
+	virtual operator float() const;
+	virtual operator double() const;
 
 };

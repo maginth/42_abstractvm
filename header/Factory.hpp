@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:43:15 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/11 12:57:19 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/12 20:30:19 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,10 @@ public:
 		= {0xff, 0xffff, 0xffffffff, 0xffffffff, 0xffffffffffffffff};
 	static string		eOperandTypeString[] = 
 		{"Int8", "Int16", "Int32", "Float", "Double", NULL};
+	static string const		eOpCodeString[] = 
+		{"push", "pop", "dump", "assert", "add", "sub", "mul", "div", "mod", "print", "exit", NULL};
+	static int const		eOpCodeArg[] =
+		{1, 0, 0, 1, 0, 0, 0, 0 ,0 ,0 ,0};
 
 
 	static IOperand const * (Factory::create_func const)(std::string const & value)[] =

@@ -6,15 +6,29 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:48:16 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/11 14:08:24 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/12 20:08:36 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 #include <IOperand.hpp>
 #include <Factory.hpp>
-
 #include <iostream>
+
+#define CAST(T) \
+	virtual operator T() const 			\
+	{									\
+		return static_cast<T>(_value);	\
+	}
+
+#define OPERATOR(X)
+	virtual IOperand const * operator X( IOperand const & rhs ) const	\
+	{																	\
+		if (ETYPE < rhs->getType())										\
+			return rhs.upgrade(*this) X rhs;							\
+		return new Operand<TYPE, ETYPE>(_value X rhs);					\
+	}																	\
+
 
 template<typename TYPE, eOperandType ETYPE>
 class Operand : public IOperand
@@ -47,40 +61,18 @@ public:
 		return ETYPE;
 	}
 
-	virtual IOperand const * operator+( IOperand const & rhs ) const
-	{
-		if (ETYPE < rhs->getType())
-			return rhs.upgrade(*this) + rhs;
-		return new Operand<TYPE, ETYPE>(_value + rhs);
-	}
+	CAST(int8_t)
+	CAST(int16_t)
+	CAST(int32_t)
+	CAST(float)
+	CAST(double)
 
-	virtual IOperand const * operator-( IOperand const & rhs ) const
-	{
-		if (ETYPE < rhs->getType())
-			return rhs.upgrade(*this) - rhs;
-		return new Operand<TYPE, ETYPE>(_value - rhs);
-	}
-
-	virtual IOperand const * operator*( IOperand const & rhs ) const
-	{
-		if (ETYPE < rhs->getType())
-			return rhs.upgrade(*this) * rhs;
-		return new Operand<TYPE, ETYPE>(_value * rhs);
-	}
-
-	virtual IOperand const * operator/( IOperand const & rhs ) const
-	{
-		if (ETYPE < rhs->getType())
-			return rhs.upgrade(*this) / rhs;
-		return new Operand<TYPE, ETYPE>(_value / rhs);
-	}
-
-	virtual IOperand const * operator%( IOperand const & rhs ) const
-	{
-		if (ETYPE < rhs->getType())
-			return rhs.upgrade(*this) % rhs;
-		return new Operand<TYPE, ETYPE>(_value % rhs);
-	}
+	OPERATOR(+)
+	OPERATOR(-)
+	OPERATOR(*)
+	OPERATOR(/)
+	OPERATOR(%)
+	
 
 	virtual bool			 operator==( IOperand const & rhs ) const
 	{
@@ -107,18 +99,9 @@ public:
 
 	virtual ~IOperand( void ) {}
 
-protected:
-	template<typename TYPE2>
-	virtual operator TYPE2() const
-	{
-		return static_cast<TYPE2>(_value);
-	}
-
 private:
 
 	TYPE const				_value;
-	IOperand *				_prev;
-	
 };
 
 

@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 16:46:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/11 12:55:59 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/12 21:13:05 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,11 @@ Factory::~Factory(void)
 {}
 
 
-IOperand const ** Factory::readOperand( std::istream const & s ) const
+IOperand const * Factory::readOperand( std::ifstream const & s ) const
 {
 	std::string					value;
 	std::string					*ref;
-	Factory::eOpCode			res = 0;
+	Avm::eOpCode				res = 0;
 	static const boost::regex 	e("^(\\d+)\\((\\d+)\\)$");
 	boost::smatch				match;
 
@@ -55,52 +55,51 @@ IOperand const * Factory::createOperand( Factory::eOperandType type, std::string
 	this->*(Factory::create_func[type])(value);
 }
 
-Factory::eOpCode	Factory::readOpcode(std::istream const & s )
+std::string			Factory::skipComment(std::ifstream const & s)
+{
+	std::string			res;
+
+	do {
+		s >> res;
+	} while (res[0] == ';' && res[1] != ';');
+	if (s.eof() || (res[0] == ';' && res[1] == ';'))
+		throw EndOfInputFile();
+	return res;
+}
+
+Factory::eOpCode	Factory::readOpcode(std::ifstream const & s )
 {
 	std::string			op;
 	std::string			*ref;
-	Factory::eOpCode	res = 0;
+	Avm::eOpCode		res = 0;
+	int					args;
 
 	s >> op;
 	ref = Factory::eOpCodeString;
 	while (ref[res])
 	{
 		if (ref[res].compare(op))
+		{
+			args = Factory::eOpCodeArg[res];
+			while (args--)
+				readOperand();
 			return res;
+		}
 		res++;
 	}
 	throw AvmSyntaxError(op + " is note a valide opcode");
 }
 
-Instruction const * Factory::createInstruction(std::istream const & s ) const
+void			Factory::assemble_file(std::istream s, Avm avm)
 {
-	IOperand *arg;
-
-	switch(readOpcode(s))
+	avm.data_mode(true);
+	try
 	{
-		case Push :
-			return new Instr<Push,1>(readOperand());
-		case Pop :
-			return new Instr<Pop>();
-		case Dump :
-			return new Instr<Dump>();
-		case Assert :
-			return new Instr<Assert,1>(readOperand());
-		case Add :
-			return new Instr<Add>();
-		case Sub :
-			return new Instr<Sub>();
-		case Mul :
-			return new Instr<Mul>();
-		case Div :
-			return new Instr<Div>();
-		case Mod :
-			return new Instr<Mod>();
-		case Print :
-			return new Instr<Print>();
-		case Exit :
-			return new Instr<Exit>();
+		while (true)
+			avm.write_instruction(readOpcode(s));
 	}
+	catch(EndOfInputFile &e);
+	avm.data_mode(false);
 }
 
 IOperand const * Factory::createInt8( std::string const & value ) const
