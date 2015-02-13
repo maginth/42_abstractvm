@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 16:46:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/12 21:13:05 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/13 16:16:14 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,16 +90,17 @@ Factory::eOpCode	Factory::readOpcode(std::ifstream const & s )
 	throw AvmSyntaxError(op + " is note a valide opcode");
 }
 
-void			Factory::assemble_file(std::istream s, Avm avm)
+void			Factory::assemble_file(std::ifstream & s, Avm & avm, std::ofstream & ofs)
 {
-	avm.data_mode(true);
+	avm.assemble_mode(true);
 	try
 	{
 		while (true)
 			avm.write_instruction(readOpcode(s));
 	}
 	catch(EndOfInputFile &e);
-	avm.data_mode(false);
+	avm.saveBinary(ofs);
+	avm.assemble_mode(false);
 }
 
 IOperand const * Factory::createInt8( std::string const & value ) const
