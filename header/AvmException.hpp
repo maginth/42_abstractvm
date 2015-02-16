@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/13 11:28:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/13 11:50:30 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/16 10:28:40 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,3 +26,6 @@ public:
 private:
 	std::string const & _msg;
 };
+
+class EndOfInputFile : public AvmException
+{};
