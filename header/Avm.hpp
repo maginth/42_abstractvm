@@ -6,9 +6,13 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/10 13:19:51 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/13 14:37:07 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/16 11:22:29 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#ifndef AVM_HPP
+#define AVM_HPP
+
 
 #include <iostream>
 #include <Factory.hpp>
@@ -22,7 +26,7 @@ public:
 	Avm(Avm const & src);
 	virtual ~Avm(void);
 
-	enum eOpCode = {Push, Pop, Dump, Assert, Add, Sub, Mul, Div, Mod, Print, Exit};	
+	enum eOpCode {Push, Pop, Dump, Assert, Add, Sub, Mul, Div, Mod, Print, Exit};	
 
 	Avm &		operator=(Avm const & rhs);
 
@@ -56,3 +60,5 @@ private:
 };
 
 std::ostream &	operator<<(std::ostream & stream, Avm const & s);
+
+#endif // AVM_HPP

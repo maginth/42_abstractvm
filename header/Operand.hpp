@@ -6,9 +6,13 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:48:16 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/13 12:11:33 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/16 12:29:32 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#ifndef OPERAND_HPP
+#define OPERAND_HPP
+
 
 #include <iostream>
 #include <IOperand.hpp>
@@ -16,25 +20,21 @@
 #include <iostream>
 
 #define CAST(T) \
-	virtual operator T() const 			\
+	virtual operator T () const 			\
 	{									\
-		return static_cast<T>(_value);	\
+		return static_cast<##T>(_value);	\
 	}
 
-#define OPERATOR(X)
-	virtual IOperand const * operator X( IOperand const & rhs ) const	\
+#define OPERATOR(X)														\
+	virtual IOperand const * operator##X ( IOperand const & rhs ) const	\
 	{																	\
-		if (ETYPE < rhs->getType())										\
-			return rhs.upgrade(*this) X rhs;							\
 		return new Operand<TYPE, ETYPE>(_value X rhs);					\
 	}																	\
 }
 
-#define OPERATOR_DIV(X)
-	virtual IOperand const * operator X( IOperand const & rhs ) const	\
+#define OPERATOR_DIV(X)													\
+	virtual IOperand const * operator##X ( IOperand const & rhs ) const	\
 	{																	\
-		if (ETYPE < rhs->getType())										\
-			return rhs.upgrade(*this) X rhs;							\
 		if (rhs == static_cast<TYPE>(0))								\
 			throw AvmException("second operand of X is 0");				\
 		return new Operand<TYPE, ETYPE>(_value X rhs);					\
@@ -54,9 +54,13 @@ public:
 	virtual ~Operand<TYPE, ETYPE>(void)
 	{}
 
-	virtual IOperand const upgrade(IOperand & op) const
+	virtual IOperand * const upgrade
+	(
+		IOperand & op, 
+		IOperand * const (IOperand::*calc)(IOperand const &)
+	) const
 	{
-		return Operand<TYPE, ETYPE>(static_cast<TYPE>(op));
+		return Operand<TYPE, ETYPE>(static_cast<TYPE>(op)).*calc(*this);
 	}
 
 	Operand<TYPE, ETYPE> &		operator=(Operand<TYPE, ETYPE> const & rhs);
@@ -114,10 +118,4 @@ private:
 	TYPE const				_value;
 };
 
-
-template<typename TYPE, eOperandType ETYPE>
-std::ostream &	operator<<(std::ostream & stream, Operand<TYPE, ETYPE> const & s)
-{
-	stream << static_cast<TYPE>(s) << std::endl;
-	return stream;
-}
+#endif // OPERAND_HPP

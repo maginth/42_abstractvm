@@ -6,16 +6,24 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:43:15 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/12 20:30:19 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/16 11:27:46 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef FACTORY_HPP
+#define FACTORY_HPP
+
 #include <iostream>
+#include <fstream>
+#include <IOperand.hpp>
+#include <Operand.hpp>
+#include <AvmException.hpp>
+#include <Avm.hpp>
+
 
 
 class Factory {
 public:
-	enum eOperandType = {Int8, Int16, Int32, Float, Double};
 	static unsigned double eOperandMax[] 
 		= {0xff, 0xffff, 0xffffffff, 0xffffffff, 0xffffffffffffffff};
 	static string		eOperandTypeString[] = 
@@ -56,5 +64,6 @@ private:
 	
 };
 
+#endif // FACTORY_HPP
 
 

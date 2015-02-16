@@ -6,9 +6,15 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:37:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/12 19:39:10 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/16 12:24:08 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#ifndef I_OPERAND_HPP
+#define I_OPERAND_HPP
+
+
+enum eOperandType {Int8, Int16, Int32, Float, Double};
 
 class IOperand {
 public:
@@ -22,10 +28,13 @@ public:
 	virtual IOperand const * operator/( IOperand const & rhs ) const = 0; // Quotient
 	virtual IOperand const * operator%( IOperand const & rhs ) const = 0; // Modulo
 	virtual bool			 operator==( IOperand const & rhs ) const = 0;
-	virtual IOperand const * upgrade(IOperand::*cast) const = 0;
+	virtual IOperand const * upgrade(
+		IOperand & op, 
+		IOperand const * (IOperand::*calc)(IOperand const &)
+	) const = 0;
 
 	virtual std::string const & toString( void ) const = 0; // String representation of the instance
-	virtual int			const 	opSize( void ) const = 0;
+	virtual int				 	opSize( void ) const = 0;
 	virtual ~IOperand( void ) {}
 
 	virtual operator int8_t() const;
@@ -35,3 +44,5 @@ public:
 	virtual operator double() const;
 
 };
+
+#endif // I_OPERAND_HPP

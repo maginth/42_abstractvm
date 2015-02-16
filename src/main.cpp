@@ -6,21 +6,23 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/12 20:09:10 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/13 16:12:18 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/16 11:20:16 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include <Factory.hpp>
 
 #define O_FLAG 1;
 #define B_FLAG 2;
 #define I_FLAG 4;
 
-int					read_flag(int & argc, char const  & *argv[])
+int					read_flag(int & argc, char const  ** & argv)
 {
-	arc--;
+	argc--;
 	argv++;
-	if ("-o".compare(*argv) == 0)
+	if (std::string("-o").compare(*argv) == 0)
 		return O_FLAG;
-	if ("-b".compare(*argv) == 0)
+	if (std::string("-b").compare(*argv) == 0)
 		return B_FLAG;
 	argc++;
 	argv--;
