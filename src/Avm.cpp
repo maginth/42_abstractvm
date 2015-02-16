@@ -6,18 +6,20 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/11 12:58:22 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/12 21:20:02 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/13 14:38:57 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include <Avm.hpp>
 
-Avm::Avm(void)
-{}
+Avm::Avm(void) : _stack_start(NULL) {}
 
 Avm::~Avm(void)
-{}
+{
+	if (_stack_start)
+		delete _stack_start;
+}
 
 inline void	* Avm::reserveStack(int const size)
 {
@@ -27,54 +29,133 @@ inline void	* Avm::reserveStack(int const size)
 	res = avm._stack;
 	avm._stack += size;
 	if (avm._stack > avm._stack_end)
-		throw AvmStackOverflow();
+		throw AvmException("Avm stack overflow");
 	return res;
 }
 
 void	Avm::pop()
 {
-	*_stack -= _stack->opSize();
+	static_cast<byte *>(_stack) -= _stack->opSize();
 	if (_stack < _stack_start)
-		throw AvmPopOnEmptyStack();
+		throw AvmException("Pop on empty stack");
 }
 
 void	Avm::push()
 {
+	int	op_size;
+
+	op_size = _data_segment->opSize();
 	*_stack = *_data_segment;
-	reinterpret_cast<byte *>(_data_segment) -= _data_segment->opSize();
+	reinterpret_cast<byte *>(_data_segment) += op_size;
+	reinterpret_cast<byte *>(_stack) 		+= op_size;
+}
+
+void	Avm::print()
+{
+	std::cout << _stack->toString() << std::endl;
+}
+
+void	Avm::dump()
+{
+	IOperand	*save;
+
+	save = _stack;
+	while (s > _stack_start)
+	{
+		pop();
+		print();
+	}
+	_stack = save;
+}
+
+void	Avm::assert()
+{
+	IOperand	*a;
+	IOperand	*b;
+
+	a = _stack;
+	pop();
+	b = _stack;
+	_stack = a;
+	push();
+	if (!(*a == *b))
+		throw AvmException("Assert fail :" + a->toString() + " != " + b->toString());
+	pop();
+	
 }
 
 
-void	Avm::data_mode(bool data_mode)
+void	Avm::assemble_mode(bool assemble_mode)
 {
-	int	size;
+	int	stack_size;
+	int	data_size;
+	int	line_size;
 
-	if (data_mode)
+	if (assemble_mode)
 	{
-		size = DATA_MAX_SIZE;
-		Avm::_data_mod_avm = this;
+		stack_size = DATA_MAX_SIZE;
+		data_size = 0;
+		line_size = DATA_MAX_SIZE;
+		if (_stack_start)
+			delete _stack_start;
+		_stack_start = new byte[stack_size + line_size];
+		_instruction = static_cast<byte>(_stack_start) + stack_size;
+		Avm::_assemble_mode_avm = this;
 	}
 	else
 	{
-		_data_segment = static_cast<IOperand *>
-			(realloc(_stack_start, (int)(_stack - _stack_start)));
-		size = _line * sizeof(Operand<double, Double>);
-		Avm::_data_mode_avm = NULL;
+		stack_size = _line * sizeof(Operand<double, Double>);
+		data_size = _stack - _stack_start;
+		line_size = _line * sizeof(Avm::eOpcode);
+		memmove(_instruction, _stack + stack_size + data_size, line_size);
+		_stack_start = realloc(_stack_start, stack_size + data_size + line_size);
+		Avm::_assemble_mode_avm = NULL;
 	}
 	_line = 0;
-	_stack_start =
-	_stack = static_cast<IOperand *>(new byte[size]);
-	_stack_end = static_cast<IOperand *>(static_cast<byte *>_stack + size);
+	_data_segment = _stack_end = static_cast<byte *>(_stack_start) + stack_size;
+	_instruction = static_cast<byte *>(_data_segment) + data_size;
+	_stack = _stack_start;
 }
 
-void	Avm::write_instruction(eOpcode opcode)
+void	Avm::write_instruction(Avm::eOpcode opcode)
 {
 	_instruction[_line++] = opcode;
 }
 
+void	Avm::saveBinary(ofstream & ofs) const
+{
+	int	data_size;
+
+	data_size = _stack - _stack_start;
+	ofs.write(_line, sizeof(int));
+	ofs.write(data_size, sizeof(int));
+	ofs.write(_instruction, _line * sizeof(Avm::eOpcode));
+	ofs.write(_stack_start, data_size);
+	ofs.close();
+}
+
+void	Avm::loadBinary(ifstream & ifs)
+{
+	int	stack_size;
+	int	data_size;
+	int	line_size;
+
+	ifs.read(_line, sizeof(int));
+	ifs.read(data_size, sizeof(int));
+	stack_size = _line * sizeof(Operand<double, Double>);
+	line_size = _line * sizeof(Avm::eOpcode);
+	if (_stack_start)
+		delete _stack_start;
+	_stack = _stack_start = new byte[stack_size + data_size + line_size];
+	_data_segment = _stack_end = static_cast<byte *>(_stack_start) + stack_size;
+	_instruction = static_cast<byte *>(_data_segment) + data_size;
+	ifs.read(_instruction, line_size);
+	ifs.read(_data_segment, data_size);
+	ifs.close();
+}
 
 template<IOperand * (IOperand::*FUNC)(IOperand &)>
-void binary_op()
+void 	Avm::binary_op()
 {
 	IOperand		&a;
 	IOperand		&b;
@@ -84,36 +165,30 @@ void binary_op()
 	pop();
 	b = *_stack;
 	a.*FUNC(b);
-	delete a;
-	delete b;
 }
 
-
-void		Avm::instruction_loop()
+void		Avm::run()
 {
 	static		(Avm::*instr_list)( void )[]
 	{
 		&Avm::push,
 		&Avm::pop,
 		&Avm::dump,
-		&Avm::Assert,
+		&Avm::assert,
 		&Avm::binary_op<&IOperand::operator+>,
 		&Avm::binary_op<&IOperand::operator->,
 		&Avm::binary_op<&IOperand::operator*>,
 		&Avm::binary_op<&IOperand::operator/>,
-		&Avm::binary_op<&IOperand::operator%>
+		&Avm::binary_op<&IOperand::operator%>,
+		&Avm::print,
+		NULL
 	}
 
-	while(_instruction != Exit)
+	while(*_instruction < Exit)
 	{
-		instr_list[_instruction++];
+		instr_list[*(_instruction++)]();
 		_line++;
 	}
-}
-
-
-void		Avm::run()
-{
-	_line = 0;
-
+	if (_instruction != Exit)
+		throw AvmException("corrupt file : invalide binary operation");
 }

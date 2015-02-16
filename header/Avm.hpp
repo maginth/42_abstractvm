@@ -6,11 +6,12 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/10 13:19:51 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/12 21:17:58 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/13 14:37:07 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
+#include <Factory.hpp>
 #define DATA_MAX_SIZE 10000000
 typedef unsigned char byte;
 
@@ -26,9 +27,20 @@ public:
 	Avm &		operator=(Avm const & rhs);
 
 	void					run();
-	void					instruction_loop();
+	void					instruction_loop(void);
 	inline static void		reserveStack(int const size);
-	inline void				data_mode(bool);
+	inline void				assemble_mode(bool);
+	void					pop(void);
+	void					push(void);
+	void					dump(void);
+	void					assert(void);
+	void					print(void);
+
+	template<IOperand * (IOperand::*FUNC)(IOperand &)>
+	void 					binary_op();
+
+	void					saveBinary(std::ofstream & ofs) const;
+	void					loadBinary(std::ifstream & ifs);
 	
 private:
 	IOperand	*_stack;
@@ -40,7 +52,7 @@ private:
 	eOpCode		*_instruction;
 	
 	int			_line;
-	static Avm *	_data_mode_avm;
+	static Avm *	_assemble_mode_avm;
 };
 
 std::ostream &	operator<<(std::ostream & stream, Avm const & s);

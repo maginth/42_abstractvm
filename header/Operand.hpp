@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:48:16 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/12 20:08:36 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/13 12:11:33 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,17 @@
 			return rhs.upgrade(*this) X rhs;							\
 		return new Operand<TYPE, ETYPE>(_value X rhs);					\
 	}																	\
+}
 
+#define OPERATOR_DIV(X)
+	virtual IOperand const * operator X( IOperand const & rhs ) const	\
+	{																	\
+		if (ETYPE < rhs->getType())										\
+			return rhs.upgrade(*this) X rhs;							\
+		if (rhs == static_cast<TYPE>(0))								\
+			throw AvmException("second operand of X is 0");				\
+		return new Operand<TYPE, ETYPE>(_value X rhs);					\
+	}
 
 template<typename TYPE, eOperandType ETYPE>
 class Operand : public IOperand
@@ -70,8 +80,8 @@ public:
 	OPERATOR(+)
 	OPERATOR(-)
 	OPERATOR(*)
-	OPERATOR(/)
-	OPERATOR(%)
+	OPERATOR_DIV(/)
+	OPERATOR_DIV(%)
 	
 
 	virtual bool			 operator==( IOperand const & rhs ) const
@@ -108,5 +118,6 @@ private:
 template<typename TYPE, eOperandType ETYPE>
 std::ostream &	operator<<(std::ostream & stream, Operand<TYPE, ETYPE> const & s)
 {
-	std::ostream << s.toString() << std::endl;
+	stream << static_cast<TYPE>(s) << std::endl;
+	return stream;
 }
