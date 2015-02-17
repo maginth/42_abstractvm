@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 16:46:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/16 10:28:00 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/17 16:37:10 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,23 @@
 #include <Operand.hpp>
 #include <cstdio> 
 #include <cstdlib> 
+#include <boost/lexical_cast.hpp>
+
+
+std::string const		Factory::eOperandTypeString[] = 
+	{"Int8", "Int16", "Int32", "Float", "Double", NULL};
+std::string const		Factory::eOpCodeString[] = 
+	{"push", "pop", "dump", "assert", "add", "sub", "mul", "div", "mod", "print", "exit", NULL};
+const int				Factory::eOpCodeArg[] =
+	{1, 0, 0, 1, 0, 0, 0, 0 ,0 ,0 ,0};
+t_create_func Factory::create_func[] =
+	{
+		&Factory::createInt8,
+		&Factory::createInt16,
+		&Factory::createInt32,
+		&Factory::createFloat,
+		&Factory::createDouble,
+	};
 
 Factory::Factory(void)
 {}
@@ -32,7 +49,7 @@ IOperand const * Factory::readOperand( std::ifstream const & s ) const
 {
 	std::string					value;
 	std::string					*ref;
-	Avm::eOpCode				res = 0;
+	Avm::eOpcode				res = 0;
 	static const boost::regex 	e("^(\\d+)\\((\\d+)\\)$");
 	boost::smatch				match;
 
@@ -55,7 +72,7 @@ IOperand const * Factory::createOperand( Factory::eOperandType type, std::string
 	this->*(Factory::create_func[type])(value);
 }
 
-std::string			Factory::skipComment(std::ifstream const & s)
+std::string			Factory::skipComment(std::ifstream const & s) const
 {
 	std::string			res;
 
@@ -67,11 +84,11 @@ std::string			Factory::skipComment(std::ifstream const & s)
 	return res;
 }
 
-Factory::eOpCode	Factory::readOpcode(std::ifstream const & s )
+Avm::eOpCode		Factory::readOpcode(std::ifstream const & s ) const
 {
 	std::string			op;
 	std::string			*ref;
-	Avm::eOpCode		res = 0;
+	Avm::eOpcode		res = 0;
 	int					args;
 
 	s >> op;
@@ -91,7 +108,7 @@ Factory::eOpCode	Factory::readOpcode(std::ifstream const & s )
 }
 
 
-void			Factory::assemble_file(std::ifstream & s, Avm & avm, std::ofstream & ofs)
+void			Factory::assemble_file(std::ifstream & s, Avm & avm, std::ofstream & ofs) const
 {
 	avm.assemble_mode(true);
 	try
@@ -106,25 +123,25 @@ void			Factory::assemble_file(std::ifstream & s, Avm & avm, std::ofstream & ofs)
 
 IOperand const * Factory::createInt8( std::string const & value ) const
 {
-	return new Operand<int8_t, Int8>(Int8, boost::lexical_cast<int8_t>(value));
+	return new Operand<int8_t, Int8>(boost::lexical_cast<int8_t>(value));
 }
 
 IOperand const * Factory::createInt16( std::string const & value ) const
 {
-	return new Operand<int16_t, Int16>(Int8, boost::lexical_cast<int16_t>(value));
+	return new Operand<int16_t, Int16>(boost::lexical_cast<int16_t>(value));
 }
 
 IOperand const * Factory::createInt32( std::string const & value ) const
 {
-	return new Operand<int32_t, Int32>(Int8, boost::lexical_cast<int32_t>(value));
+	return new Operand<int32_t, Int32>(boost::lexical_cast<int32_t>(value));
 }
 
 IOperand const * Factory::createFloat( std::string const & value ) const
 {
-	return new Operand<float, Float>(Int8, boost::lexical_cast<float>(value));
+	return new Operand<float, Float>(boost::lexical_cast<float>(value));
 }
 
 IOperand const * Factory::createDouble( std::string const & value ) const
 {
-	return new Operand<double, Double>(Int8, boost::lexical_cast<double>(value));
+	return new Operand<double, Double>(boost::lexical_cast<double>(value));
 }

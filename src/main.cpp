@@ -6,15 +6,15 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/12 20:09:10 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/16 11:20:16 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/17 11:56:44 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <Factory.hpp>
 
-#define O_FLAG 1;
-#define B_FLAG 2;
-#define I_FLAG 4;
+#define O_FLAG 1
+#define B_FLAG 2
+#define I_FLAG 4
 
 int					read_flag(int & argc, char const  ** & argv)
 {
@@ -30,8 +30,8 @@ int					read_flag(int & argc, char const  ** & argv)
 }
 
 void				manage_file(char const *file,
-							std::ofstream & *ofs,
-							std::ofstream & *ifs,
+							std::ofstream * &ofs,
+							std::ifstream * &ifs,
 							int flag)
 {
 	try
@@ -53,18 +53,18 @@ void				manage_file(char const *file,
 	}
 	catch (std::exception & e)
 	{
-		std::cout << "Avm file error : " << file << " " << e << std::endl;
+		std::cout << "Avm file error : " << file << " " << e.what() << std::endl;
 	}
 }
 
-void				print_usage()
+void				print_usage(char const *name)
 {
 	std::cout 
 	<< "Usage : "
-	<< argv[0]
+	<< name
 	<< " [-o file.bytecode] [file.avm] [-b file.bytecode]" 
 	<< std::endl;
-	exit();
+	exit(-1);
 }
 
 int 				main(int argc, char const *argv[])
@@ -76,7 +76,7 @@ int 				main(int argc, char const *argv[])
 	int					flag;
 	
 	if (argc == 1)
-		print_usage();
+		print_usage(argv[0]);
 	try
 	{
 		while (--argc)
@@ -86,7 +86,7 @@ int 				main(int argc, char const *argv[])
 			{
 				if (!(flag & B_FLAG))
 					manage_file(*argv, ofs, ifs, flag);	
-				factory.assemble_file(ifs, avm, ofs);
+				factory.assemble_file(*ifs, avm, *ofs);
 				if (!(flag & O_FLAG))
 					avm.run();
 				flag &= ~(O_FLAG | I_FLAG);
@@ -94,7 +94,7 @@ int 				main(int argc, char const *argv[])
 			if (flag & B_FLAG)
 			{
 				manage_file(*argv, ofs, ifs, flag);
-				avm.loadBinary(ifs);
+				avm.loadBinary(*ifs);
 				avm.run();
 				flag &= ~B_FLAG;
 			}
@@ -105,9 +105,9 @@ int 				main(int argc, char const *argv[])
 		}
 		manage_file("", ofs, ifs, 0);	
 	} 
-	catch (AvmException & e)
+	catch (std::exception & e)
 	{
-		std::cout << "Avm " << *argv << " " << avm.get_line() << e << std::endl;
+		std::cout << "Avm " << *argv << " " << avm.get_line() << e.what() << std::endl;
 	}
 	return 0;
 }

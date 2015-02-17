@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:48:16 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/16 12:16:10 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/17 16:28:11 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,28 +16,28 @@
 
 #include <iostream>
 #include <IOperand.hpp>
+#include <Avm.hpp>
 #include <Factory.hpp>
-#include <iostream>
+#include <sstream>
 
 #define CAST(T) \
-	virtual operator T() const 			\
-	{									\
-		return static_cast<T>(_value);	\
+	virtual operator T () const 			\
+	{										\
+		return static_cast< T >(_value);	\
 	}
 
-#define OPERATOR(X)
+#define OPERATOR(X)	\
 	virtual IOperand const * operator X ( IOperand const & rhs ) const	\
 	{																	\
-		return new Operand<TYPE, ETYPE>(_value X rhs);					\
-	}																	\
-}
+		return new Operand<TYPE, ETYPE>(_value X static_cast<TYPE>(rhs));\
+	}
 
-#define OPERATOR_DIV(X)
+#define OPERATOR_DIV(X)	\
 	virtual IOperand const * operator X ( IOperand const & rhs ) const	\
-	{
-		if (rhs == static_cast<TYPE>(0))								\
-			throw AvmException("second operand of X is 0");				\
-		return new Operand<TYPE, ETYPE>(_value X rhs);					\
+	{																	\
+		if (static_cast<TYPE>(rhs) == static_cast<TYPE>(0))				\
+			throw AvmException("second operand of "#X" is 0");			\
+		return new Operand<TYPE, ETYPE>(_value X static_cast<TYPE>(rhs));\
 	}
 
 template<typename TYPE, eOperandType ETYPE>
@@ -51,16 +51,20 @@ public:
 		_value(value)
 	{}
 
+	void *				operator new(std::size_t size)
+	{
+		return Avm::reserveStack(size);
+	}
+
 	virtual ~Operand<TYPE, ETYPE>(void)
 	{}
 
-	virtual IOperand * const upgrade
-	(
+	virtual IOperand const * upgrade(
 		IOperand & op, 
-		IOperand * const (IOperand::*calc)(IOperand const &)
+		IOperand const * (IOperand::*calc)(IOperand const &)
 	) const
 	{
-		return Operand<TYPE, ETYPE>(static_cast<TYPE>(op)).*calc(*this);
+		return (Operand<TYPE, ETYPE>(static_cast<TYPE>(op)).*calc)(*this);
 	}
 
 	Operand<TYPE, ETYPE> &		operator=(Operand<TYPE, ETYPE> const & rhs);
@@ -90,10 +94,10 @@ public:
 
 	virtual bool			 operator==( IOperand const & rhs ) const
 	{
-		return rhs->getType() == ETYPE && _value == static_cast<TYPE>(rhs);
+		return rhs.getType() == ETYPE && _value == static_cast<TYPE>(rhs);
 	}
 
-	virtual std::string const & toString( void ) const
+	virtual std::string const toString( void ) const
 	{
 		std::stringstream	res;
 
@@ -101,17 +105,11 @@ public:
 		return (res.str());
 	}
 
-	virtual int			const 	opSize( void ) const
+	virtual  int		 		opSize( void ) const
 	{
 		return sizeof(Operand);
 	}
 
-	void *				Operand::operator new(std::size_t size)
-	{
-		return Avm::reserveStack(int size);
-	}
-
-	virtual ~IOperand( void ) {}
 
 private:
 
