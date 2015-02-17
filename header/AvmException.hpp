@@ -6,9 +6,12 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/13 11:28:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/16 10:28:40 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/16 11:14:31 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#ifndef AVM_EXCEPTION_HPP
+#define AVM_EXCEPTION_HPP
 
 #include <iostream>
 
@@ -29,3 +32,5 @@ private:
 
 class EndOfInputFile : public AvmException
 {};
+
+#endif // AVM_EXCEPTION_HPP

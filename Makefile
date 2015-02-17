@@ -2,7 +2,10 @@ NAME = avm
 IPATH = ./header/
 SPATH = ./src/
 OPATH = ./obj/
-SRCS = main.cpp
+SRCS = main.cpp \
+		Acm.cpp \
+		AvmException.cpp \
+		Factory.cpp \
 
 V ?= 0
 
@@ -16,7 +19,7 @@ DEBUG_1 = -g
 DEBUG_0 =
 
 
-CFLAGS = $(DEBUG_$(D)) -Wall -Werror -Wextra
+CFLAGS = $(DEBUG_$(D)) -Wall -Werror -Wextra -std=c++11
 CC = $(SILENCE)g++
 RM = $(SILENCE)rm -rf
 

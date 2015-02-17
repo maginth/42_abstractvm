@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/11 12:58:22 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/13 14:38:57 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/16 11:51:43 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,7 +164,10 @@ void 	Avm::binary_op()
 	a = *_stack;
 	pop();
 	b = *_stack;
-	a.*FUNC(b);
+	if (a.getType < b.getType)
+		b.upgrade(a,FUNC);
+	else
+		a.*FUNC(b);
 }
 
 void		Avm::run()
