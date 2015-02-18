@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:37:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/17 11:11:18 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/18 10:45:44 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ public:
 		IOperand const * (IOperand::*calc)(IOperand const &)
 	) const = 0;
 
-	virtual std::string const & toString( void ) const = 0; // String representation of the instance
+	virtual std::string const toString( void ) const = 0; // String representation of the instance
 	virtual  int				opSize( void ) const = 0;
 	virtual ~IOperand( void ) {}
 

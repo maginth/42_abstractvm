@@ -3,7 +3,7 @@ IPATH = ./header/
 SPATH = ./src/
 OPATH = ./obj/
 SRCS = main.cpp \
-		Acm.cpp \
+		Avm.cpp \
 		AvmException.cpp \
 		Factory.cpp \
 
@@ -18,8 +18,10 @@ SILENCE = $(SILENCE_$(V))
 DEBUG_1 = -g
 DEBUG_0 =
 
+BOOST = $$HOME/.brew/Cellar/boost/1.55.0_1
+LIB = -I$(BOOST)/include -L.$(BOOST)/lib/
 
-CFLAGS = $(DEBUG_$(D)) -Wall -Werror -Wextra -std=c++11
+CFLAGS = $(DEBUG_$(D)) -Wall -Werror -Wextra -std=c++11 $(LIB)
 CC = $(SILENCE)g++
 RM = $(SILENCE)rm -rf
 

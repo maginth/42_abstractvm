@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:48:16 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/17 11:13:17 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/18 10:45:22 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,15 +29,15 @@
 #define OPERATOR(X)	\
 	virtual IOperand const * operator X ( IOperand const & rhs ) const	\
 	{																	\
-		return new Operand<TYPE, ETYPE>(_value X rhs);					\
+		return new Operand<TYPE, ETYPE>(_value X static_cast<TYPE>(rhs));\
 	}
 
 #define OPERATOR_DIV(X)	\
 	virtual IOperand const * operator X ( IOperand const & rhs ) const	\
 	{																	\
-		if (rhs == static_cast<TYPE>(0))								\
-			throw AvmException("second operand of X is 0");				\
-		return new Operand<TYPE, ETYPE>(_value X rhs);					\
+		if (static_cast<TYPE>(rhs) == static_cast<TYPE>(0))				\
+			throw AvmException("second operand of "#X" is 0");			\
+		return new Operand<TYPE, ETYPE>(_value X static_cast<TYPE>(rhs));\
 	}
 
 template<typename TYPE, eOperandType ETYPE>
@@ -64,7 +64,7 @@ public:
 		IOperand const * (IOperand::*calc)(IOperand const &)
 	) const
 	{
-		return Operand<TYPE, ETYPE>(static_cast<TYPE>(op)).*calc(*this);
+		return (Operand<TYPE, ETYPE>(static_cast<TYPE>(op)).*calc)(*this);
 	}
 
 	Operand<TYPE, ETYPE> &		operator=(Operand<TYPE, ETYPE> const & rhs);
@@ -97,7 +97,7 @@ public:
 		return rhs.getType() == ETYPE && _value == static_cast<TYPE>(rhs);
 	}
 
-	virtual std::string const & toString( void ) const
+	virtual std::string const toString( void ) const
 	{
 		std::stringstream	res;
 
