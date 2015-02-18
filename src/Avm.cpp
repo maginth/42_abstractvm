@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/11 12:58:22 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/16 11:51:43 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/17 11:07:57 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,6 +154,12 @@ void	Avm::loadBinary(ifstream & ifs)
 	ifs.close();
 }
 
+
+int const &		Avm::get_line()
+{
+	return _line;
+}
+
 template<IOperand * (IOperand::*FUNC)(IOperand &)>
 void 	Avm::binary_op()
 {
@@ -164,7 +170,7 @@ void 	Avm::binary_op()
 	a = *_stack;
 	pop();
 	b = *_stack;
-	if (a.getType < b.getType)
+	if (a.getType() < b.getType())
 		b.upgrade(a,FUNC);
 	else
 		a.*FUNC(b);

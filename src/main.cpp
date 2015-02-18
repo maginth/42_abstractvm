@@ -6,15 +6,15 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/12 20:09:10 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/16 11:20:16 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/17 11:42:13 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <Factory.hpp>
 
-#define O_FLAG 1;
-#define B_FLAG 2;
-#define I_FLAG 4;
+#define O_FLAG 1
+#define B_FLAG 2
+#define I_FLAG 4
 
 int					read_flag(int & argc, char const  ** & argv)
 {
@@ -30,8 +30,8 @@ int					read_flag(int & argc, char const  ** & argv)
 }
 
 void				manage_file(char const *file,
-							std::ofstream & *ofs,
-							std::ofstream & *ifs,
+							std::ofstream * &ofs,
+							std::ifstream * &ifs,
 							int flag)
 {
 	try
@@ -105,7 +105,7 @@ int 				main(int argc, char const *argv[])
 		}
 		manage_file("", ofs, ifs, 0);	
 	} 
-	catch (AvmException & e)
+	catch (std::exception & e)
 	{
 		std::cout << "Avm " << *argv << " " << avm.get_line() << e << std::endl;
 	}

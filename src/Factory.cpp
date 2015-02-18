@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 16:46:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/16 10:28:00 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/17 11:39:43 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,22 @@
 #include <Operand.hpp>
 #include <cstdio> 
 #include <cstdlib> 
+
+
+static std::string const		Factory::eOperandTypeString[] = 
+	{"Int8", "Int16", "Int32", "Float", "Double", NULL};
+static std::string const		Factory::eOpCodeString[] = 
+	{"push", "pop", "dump", "assert", "add", "sub", "mul", "div", "mod", "print", "exit", NULL};
+static const int				Factory::eOpCodeArg[] =
+	{1, 0, 0, 1, 0, 0, 0, 0 ,0 ,0 ,0};
+static t_create_func Factory::create_func[] =
+	{
+		&Factory::createInt8,
+		&Factory::createInt16,
+		&Factory::createInt32,
+		&Factory::createFloat,
+		&Factory::createDouble,
+	};
 
 Factory::Factory(void)
 {}
@@ -55,7 +71,7 @@ IOperand const * Factory::createOperand( Factory::eOperandType type, std::string
 	this->*(Factory::create_func[type])(value);
 }
 
-std::string			Factory::skipComment(std::ifstream const & s)
+std::string			Factory::skipComment(std::ifstream const & s) const
 {
 	std::string			res;
 
@@ -67,7 +83,7 @@ std::string			Factory::skipComment(std::ifstream const & s)
 	return res;
 }
 
-Factory::eOpCode	Factory::readOpcode(std::ifstream const & s )
+Factory::eOpCode	Factory::readOpcode(std::ifstream const & s ) const
 {
 	std::string			op;
 	std::string			*ref;
@@ -91,7 +107,7 @@ Factory::eOpCode	Factory::readOpcode(std::ifstream const & s )
 }
 
 
-void			Factory::assemble_file(std::ifstream & s, Avm & avm, std::ofstream & ofs)
+void			Factory::assemble_file(std::ifstream & s, Avm & avm, std::ofstream & ofs) const
 {
 	avm.assemble_mode(true);
 	try

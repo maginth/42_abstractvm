@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/10 13:19:51 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/16 11:22:29 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/17 10:33:01 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ public:
 	void					dump(void);
 	void					assert(void);
 	void					print(void);
+	int const &				get_line(void);
 
 	template<IOperand * (IOperand::*FUNC)(IOperand &)>
 	void 					binary_op();
