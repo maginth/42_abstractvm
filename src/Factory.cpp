@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 16:46:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/18 10:43:40 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/18 13:42:43 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,38 +16,17 @@
 #include <cstdio> 
 #include <cstdlib> 
 #include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
+#include <algorithm>
 
 
-std::string const		Factory::eOperandTypeString[] = 
-	{"Int8", "Int16", "Int32", "Float", "Double", NULL};
-std::string const		Factory::eOpCodeString[] = 
-	{"push", "pop", "dump", "assert", "add", "sub", "mul", "div", "mod", "print", "exit", NULL};
+std::vector<std::string const>		Factory::eOperandTypeString = 
+	{"Int8", "Int16", "Int32", "Float", "Double"};
+std::vector<std::string const>		Factory::eOpCodeString = 
+	{"push", "pop", "dump", "assert", "add", "sub", "mul", "div", "mod", "print", "exit"};
 const int				Factory::eOpCodeArg[] =
 	{1, 0, 0, 1, 0, 0, 0, 0 ,0 ,0 ,0};
-t_create_func Factory::create_func[] =
-	{
-		&Factory::createInt8,
-		&Factory::createInt16,
-		&Factory::createInt32,
-		&Factory::createFloat,
-		&Factory::createDouble,
-	};
 
-
-static std::string const		Factory::eOperandTypeString[] = 
-	{"Int8", "Int16", "Int32", "Float", "Double", NULL};
-static std::string const		Factory::eOpCodeString[] = 
-	{"push", "pop", "dump", "assert", "add", "sub", "mul", "div", "mod", "print", "exit", NULL};
-static const int				Factory::eOpCodeArg[] =
-	{1, 0, 0, 1, 0, 0, 0, 0 ,0 ,0 ,0};
-static t_create_func Factory::create_func[] =
-	{
-		&Factory::createInt8,
-		&Factory::createInt16,
-		&Factory::createInt32,
-		&Factory::createFloat,
-		&Factory::createDouble,
-	};
 
 Factory::Factory(void)
 {}
@@ -61,34 +40,43 @@ Factory::~Factory(void)
 {}
 
 
-IOperand const * Factory::readOperand( std::ifstream const & s ) const
+IOperand const * Factory::readOperand( std::ifstream & s ) const
 {
-	std::string					value;
-	std::string					*ref;
-	Avm::eOpcode				res = 0;
+	std::string					whole_type;
+	eOperandType				res;
 	static const boost::regex 	e("^(\\d+)\\((\\d+)\\)$");
 	boost::smatch				match;
 
-	s >> value;
-	boost::regex_search(value, match, e);
-	if (!match[0])
-		throw AvmSyntaxError(value + " is not a valid operand" )
-	ref = Factory::eOperationString;
-	while (ref[res])
-	{
-		if (ref[res].compare(match[1].first))
-			return createOperand(res, match[1].second);
-		res++;
-	}
-	throw AvmSyntaxError(match[1].first + " is note a valide type");
+	s >> whole_type;
+	if (!boost::regex_match(whole_type, match, e))
+		throw AvmException(whole_type + " is not a valid operand" );
+
+	res = static_cast<eOperandType>(
+			std::find(eOperandTypeString.begin(),
+					eOperandTypeString.end(),
+					std::string(match[1].first, match[1].second))
+			- eOperandTypeString.begin());
+
+	std::string type(match[2].first, match[2].second);
+	if (res != TypeError)
+		return createOperand(res, type);
+	throw AvmException(type + " is note a valide type");
 }
 
-IOperand const * Factory::createOperand( Factory::eOperandType type, std::string const & value ) const
+IOperand const * Factory::createOperand( eOperandType type, std::string & value ) const
 {
+	static t_create_func create_func[] =
+	{
+		&Factory::createInt8,
+		&Factory::createInt16,
+		&Factory::createInt32,
+		&Factory::createFloat,
+		&Factory::createDouble,
+	};
 	this->*(Factory::create_func[type])(value);
 }
 
-std::string			Factory::skipComment(std::ifstream const & s) const
+std::string			Factory::skipComment(std::ifstream & s) const
 {
 	std::string			res;
 
@@ -101,27 +89,24 @@ std::string			Factory::skipComment(std::ifstream const & s) const
 }
 
 
-Avm::eOpcode		Factory::readOpcode(std::ifstream const & s ) const
+Avm::eOpcode		Factory::readOpcode(std::ifstream & s ) const
 {
 	std::string			op;
-	std::string			*ref;
-	Avm::eOpcode		res = 0;
+	Avm::eOpcode		res;
 	int					args;
 
 	s >> op;
-	ref = Factory::eOpCodeString;
-	while (ref[res])
+	res = static_cast<Avm::eOpcode>(
+			find(eOpCodeString.begin(), eOpCodeString.end(), op)
+			 - eOpCodeString.begin());
+	if (res != CodeError)
 	{
-		if (ref[res].compare(op))
-		{
-			args = Factory::eOpCodeArg[res];
-			while (args--)
-				readOperand();
-			return res;
-		}
-		res++;
+		args = Factory::eOpCodeArg[res];
+		while (args--)
+			readOperand();
+		return res;
 	}
-	throw AvmSyntaxError(op + " is note a valide opcode");
+	throw AvmException(op + " is note a valide opcode");
 }
 
 

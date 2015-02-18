@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:37:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/18 10:45:44 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/18 13:29:19 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #define I_OPERAND_HPP
 
 
-enum eOperandType {Int8, Int16, Int32, Float, Double};
+enum eOperandType {Int8, Int16, Int32, Float, Double, TypeError};
 
 class IOperand {
 public:

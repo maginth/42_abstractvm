@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:43:15 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/18 10:45:53 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/18 13:31:20 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,21 +19,24 @@
 #include <IOperand.hpp>
 #include <Operand.hpp>
 #include <Avm.hpp>
+#include <vector>
 
 class Factory;
 typedef IOperand const * (Factory::*t_create_func)(std::string const & value) const;
 
 class Factory {
 public:
-	static std::string const		eOperandTypeString[];
-	static std::string const		eOpCodeString[];
-	static const int				eOpCodeArg[];
-
-
-	static t_create_func create_func[];
+	static std::vector<std::string const>		eOperandTypeString;
+	static std::vector<std::string const>		eOpCodeString;
+	static const int							eOpCodeArg[];
 
 	Factory(void);
 	virtual ~Factory(void);
+
+
+	void			assemble_file(std::ifstream & s, Avm & avm, std::ofstream & ofs) const;
+	
+private:
 
 	IOperand const * createOperand( std::string const & value ) const;
 
@@ -45,10 +48,10 @@ public:
 	IOperand const * createFloat( std::string const & value ) const;
 	IOperand const * createDouble( std::string const & value ) const;
 
+	IOperand const * readOperand( std::ifstream & s ) const;
+	std::string		skipComment(std::ifstream & s) const;
+	Avm::eOpcode	readOpcode(std::ifstream & s ) const;
 
-	void			assemble_file(std::ifstream & s, Avm & avm, std::ofstream & ofs) const;
-	
-private:
 	Factory(Factory const & src);
 	Factory &		operator=(Factory const & rhs);
 	

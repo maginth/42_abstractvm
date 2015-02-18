@@ -18,8 +18,8 @@ SILENCE = $(SILENCE_$(V))
 DEBUG_1 = -g
 DEBUG_0 =
 
-BOOST = $$HOME/.brew/Cellar/boost/1.55.0_1
-LIB = -I$(BOOST)/include -L.$(BOOST)/lib/
+BOOST = $$HOME/boost/boost_1_57_0/
+LIB = -I$(BOOST)
 
 CFLAGS = $(DEBUG_$(D)) -Wall -Werror -Wextra -std=c++11 $(LIB)
 CC = $(SILENCE)g++

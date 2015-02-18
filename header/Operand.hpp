@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:48:16 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/18 10:45:22 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/18 11:16:28 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,17 +27,17 @@
 	}
 
 #define OPERATOR(X)	\
-	virtual IOperand const * operator X ( IOperand const & rhs ) const	\
-	{																	\
-		return new Operand<TYPE, ETYPE>(_value X static_cast<TYPE>(rhs));\
+	virtual IOperand const * operator X ( IOperand const & rhs ) const		\
+	{																		\
+		return new Operand<TYPE, ETYPE>(_value X static_cast<const TYPE>(rhs));\
 	}
 
 #define OPERATOR_DIV(X)	\
-	virtual IOperand const * operator X ( IOperand const & rhs ) const	\
-	{																	\
-		if (static_cast<TYPE>(rhs) == static_cast<TYPE>(0))				\
-			throw AvmException("second operand of "#X" is 0");			\
-		return new Operand<TYPE, ETYPE>(_value X static_cast<TYPE>(rhs));\
+	virtual IOperand const * operator X ( IOperand const & rhs ) const		\
+	{																		\
+		if (static_cast<const TYPE>(rhs) == static_cast<TYPE>(0))			\
+			throw AvmException("second operand of "#X" is 0");				\
+		return new Operand<TYPE, ETYPE>(_value X static_cast<const TYPE>(rhs));\
 	}
 
 template<typename TYPE, eOperandType ETYPE>

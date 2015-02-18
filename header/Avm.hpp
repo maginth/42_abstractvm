@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/10 13:19:51 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/18 10:46:53 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/18 13:41:24 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,11 @@ public:
 	Avm(Avm const & src);
 	virtual ~Avm(void);
 
-	enum eOpcode {Push, Pop, Dump, Assert, Add, Sub, Mul, Div, Mod, Print, Exit};	
+	enum eOpcode {Push, Pop, Dump, Assert, Add, Sub, Mul, Div, Mod, Print, Exit, CodeError};	
 
 	Avm &		operator=(Avm const & rhs);
 
 	void					run();
-	void					instruction_loop(void);
 	inline static void		*reserveStack(int const size);
 	inline void				assemble_mode(bool);
 	void					pop(void);
