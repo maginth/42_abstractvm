@@ -6,28 +6,27 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:43:15 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/18 13:31:20 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/21 15:30:39 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FACTORY_HPP
 #define FACTORY_HPP
-
-#include <iostream>
-#include <fstream>
 #include <AvmException.hpp>
 #include <IOperand.hpp>
 #include <Operand.hpp>
 #include <Avm.hpp>
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 class Factory;
 typedef IOperand const * (Factory::*t_create_func)(std::string const & value) const;
 
 class Factory {
 public:
-	static std::vector<std::string const>		eOperandTypeString;
-	static std::vector<std::string const>		eOpCodeString;
+	static std::vector<std::string>		eOperandTypeString;
+	static std::vector<std::string>		eOpCodeString;
 	static const int							eOpCodeArg[];
 
 	Factory(void);

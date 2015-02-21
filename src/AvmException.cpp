@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/13 11:46:39 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/17 15:16:20 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/21 15:15:43 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,3 +23,5 @@ const char * AvmException::what() const noexcept
 {
 	return _msg.c_str();
 }
+
+AvmException::~AvmException(void){}

@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:48:16 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/18 11:16:28 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/21 17:51:49 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <Avm.hpp>
 #include <Factory.hpp>
 #include <sstream>
+#include <math.h>
 
 #define CAST(T) \
 	virtual operator T () const 			\
@@ -32,12 +33,30 @@
 		return new Operand<TYPE, ETYPE>(_value X static_cast<const TYPE>(rhs));\
 	}
 
+template<typename T>
+inline T mod(T const a, T const b)
+{
+	return a % b;
+}
+
+template<>
+inline double mod(double const a, double const b)
+{
+	return fmod(a, b);
+}
+
+template<>
+inline float mod(float const a, float const b)
+{
+	return fmod(a, b);
+}
+
 #define OPERATOR_DIV(X)	\
 	virtual IOperand const * operator X ( IOperand const & rhs ) const		\
 	{																		\
 		if (static_cast<const TYPE>(rhs) == static_cast<TYPE>(0))			\
 			throw AvmException("second operand of "#X" is 0");				\
-		return new Operand<TYPE, ETYPE>(_value X static_cast<const TYPE>(rhs));\
+		return new Operand<TYPE, ETYPE>(mod(_value, static_cast<const TYPE>(rhs)));\
 	}
 
 template<typename TYPE, eOperandType ETYPE>
@@ -61,7 +80,7 @@ public:
 
 	virtual IOperand const * upgrade(
 		IOperand & op, 
-		IOperand const * (IOperand::*calc)(IOperand const &)
+		IOperand const * (IOperand::*calc)(IOperand const &) const
 	) const
 	{
 		return (Operand<TYPE, ETYPE>(static_cast<TYPE>(op)).*calc)(*this);

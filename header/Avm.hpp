@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/10 13:19:51 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/18 13:41:24 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/21 16:33:17 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,26 +37,23 @@ public:
 	Avm &		operator=(Avm const & rhs);
 
 	void					run();
-	inline static void		*reserveStack(int const size);
-	inline void				assemble_mode(bool);
+	static void				*reserveStack(int const size);
+	void					assemble_mode(bool);
 	void					pop(void);
 	void					push(void);
 	void					dump(void);
 	void					assert(void);
 	void					print(void);
 	int const &				get_line(void);
-	inline void				write_instruction(eOpcode opcode);
+	void					write_instruction(eOpcode opcode);
 
-	template<IOperand const * (IOperand::*FUNC)(IOperand const &)>
+	template<IOperand const * (IOperand::*FUNC)(IOperand const &) const>
 	void 					binary_op()
 	{
-		IOperand		&a;
-		IOperand		&b;
-
 		pop();
-		a = *_stack;
+		IOperand &a = *_stack;
 		pop();
-		b = *_stack;
+		IOperand &b = *_stack;
 		if (a.getType() < b.getType())
 			b.upgrade(a, FUNC);
 		else
@@ -68,7 +65,7 @@ public:
 	
 private:
 
-	inline IOperand * byte_shift(IOperand * ref, int shift) const;
+	IOperand * byte_shift(IOperand * ref, int shift) const;
 
 	IOperand	*_stack;
 	IOperand	*_stack_start;
@@ -83,5 +80,15 @@ private:
 };
 
 std::ostream &	operator<<(std::ostream & stream, Avm const & s);
+
+inline IOperand * Avm::byte_shift(IOperand * ref, int shift) const
+{
+	return reinterpret_cast<IOperand *>(reinterpret_cast<byte *>(ref) + shift);
+}
+
+inline void	Avm::write_instruction(Avm::eOpcode opcode)
+{
+	_instruction[_line++] = opcode;
+}
 
 #endif // AVM_HPP

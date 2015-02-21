@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/11 12:58:22 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/18 13:44:37 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/21 16:34:38 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,18 +16,15 @@
 
 Avm::Avm(void) : _stack_start(NULL) {}
 
+Avm * Avm::_assemble_mode_avm = NULL;
+
 Avm::~Avm(void)
 {
 	if (_stack_start)
 		delete _stack_start;
 }
 
-inline IOperand * Avm::byte_shift(IOperand * ref, int shift) const
-{
-	return reinterpret_cast<IOperand *>(reinterpret_cast<byte *>(ref) + shift);
-}
-
-inline void	* Avm::reserveStack(int const size)
+void	* Avm::reserveStack(int const size)
 {
 	void	*res;
 	Avm		&avm = *Avm::_assemble_mode_avm;
@@ -115,17 +112,11 @@ void	Avm::assemble_mode(bool assemble_mode)
 		instr_size = _line * sizeof(_instruction);
 		memmove(_instruction, _stack + stack_size + data_size, instr_size);
 		_stack_start = reinterpret_cast<IOperand *>(realloc(_stack_start, stack_size + data_size + instr_size));
-		Avm::_assemble_mode_avm = NULL;
 	}
 	_line = 0;
 	_data_segment = _stack_end = byte_shift(_stack_start, stack_size);
 	_instruction = reinterpret_cast<Avm::eOpcode*>(byte_shift(_data_segment, data_size));
 	_stack = _stack_start;
-}
-
-inline void	Avm::write_instruction(Avm::eOpcode opcode)
-{
-	_instruction[_line++] = opcode;
 }
 
 void	Avm::saveBinary(std::ofstream & ofs) const
@@ -168,21 +159,22 @@ int const &		Avm::get_line()
 
 void		Avm::run()
 {
-	static		t_instr_func instr_list[]
+	static		void (Avm::*instr_list[])()
 	{
 		&Avm::push,
 		&Avm::pop,
 		&Avm::dump,
 		&Avm::assert,
-		/*&Avm::binary_op<&IOperand::operator+ >,
-		&Avm::binary_op<&IOperand::operator- >,
-		&Avm::binary_op<&IOperand::operator* >,
-		&Avm::binary_op<&IOperand::operator/ >,
-		&Avm::binary_op<&IOperand::operator% >,*/
+		&Avm::binary_op<&IOperand::operator + >,
+		&Avm::binary_op<&IOperand::operator - >,
+		&Avm::binary_op<&IOperand::operator * >,
+		&Avm::binary_op<&IOperand::operator / >,
+		&Avm::binary_op<&IOperand::operator % >,
 		&Avm::print,
 		NULL
 	};
 
+	Avm::_assemble_mode_avm = this;
 	while(*_instruction < Exit)
 	{
 		(this->*(instr_list[*(_instruction++)]))();

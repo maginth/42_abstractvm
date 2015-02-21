@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:37:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/18 13:29:19 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/21 17:45:52 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,18 +30,18 @@ public:
 	virtual bool			 operator==( IOperand const & rhs ) const = 0;
 	virtual IOperand const * upgrade(
 		IOperand & op, 
-		IOperand const * (IOperand::*calc)(IOperand const &)
+		IOperand const * (IOperand::*calc)(IOperand const &) const
 	) const = 0;
 
 	virtual std::string const toString( void ) const = 0; // String representation of the instance
 	virtual  int				opSize( void ) const = 0;
-	virtual ~IOperand( void ) {}
+	virtual ~IOperand( void ) {};
 
-	virtual operator int8_t() const;
-	virtual operator int16_t() const;
-	virtual operator int32_t() const;
-	virtual operator float() const;
-	virtual operator double() const;
+	virtual operator int8_t() const = 0;
+	virtual operator int16_t() const = 0;
+	virtual operator int32_t() const = 0;
+	virtual operator float() const = 0;
+	virtual operator double() const = 0;
 
 };
 

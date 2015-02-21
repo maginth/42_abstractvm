@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 16:46:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/18 13:42:43 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/21 15:30:28 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,9 @@
 #include <algorithm>
 
 
-std::vector<std::string const>		Factory::eOperandTypeString = 
+std::vector<std::string>		Factory::eOperandTypeString = 
 	{"Int8", "Int16", "Int32", "Float", "Double"};
-std::vector<std::string const>		Factory::eOpCodeString = 
+std::vector<std::string>		Factory::eOpCodeString = 
 	{"push", "pop", "dump", "assert", "add", "sub", "mul", "div", "mod", "print", "exit"};
 const int				Factory::eOpCodeArg[] =
 	{1, 0, 0, 1, 0, 0, 0, 0 ,0 ,0 ,0};
@@ -31,10 +31,6 @@ const int				Factory::eOpCodeArg[] =
 Factory::Factory(void)
 {}
 
-Factory::Factory(Factory const & src)
-{
-	*this = src;	
-}
 
 Factory::~Factory(void)
 {}
@@ -63,7 +59,7 @@ IOperand const * Factory::readOperand( std::ifstream & s ) const
 	throw AvmException(type + " is note a valide type");
 }
 
-IOperand const * Factory::createOperand( eOperandType type, std::string & value ) const
+IOperand const * Factory::createOperand( eOperandType type, std::string const & value ) const
 {
 	static t_create_func create_func[] =
 	{
@@ -73,7 +69,7 @@ IOperand const * Factory::createOperand( eOperandType type, std::string & value 
 		&Factory::createFloat,
 		&Factory::createDouble,
 	};
-	this->*(Factory::create_func[type])(value);
+	return (this->*(create_func[type]))(value);
 }
 
 std::string			Factory::skipComment(std::ifstream & s) const
@@ -99,11 +95,11 @@ Avm::eOpcode		Factory::readOpcode(std::ifstream & s ) const
 	res = static_cast<Avm::eOpcode>(
 			find(eOpCodeString.begin(), eOpCodeString.end(), op)
 			 - eOpCodeString.begin());
-	if (res != CodeError)
+	if (res != Avm::CodeError)
 	{
 		args = Factory::eOpCodeArg[res];
 		while (args--)
-			readOperand();
+			readOperand(s);
 		return res;
 	}
 	throw AvmException(op + " is note a valide opcode");
@@ -118,7 +114,8 @@ void			Factory::assemble_file(std::ifstream & s, Avm & avm, std::ofstream & ofs)
 		while (true)
 			avm.write_instruction(readOpcode(s));
 	}
-	catch(EndOfInputFile &e);
+	catch(EndOfInputFile &e)
+	{}
 	avm.saveBinary(ofs);
 	avm.assemble_mode(false);
 }
