@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:48:16 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/21 17:51:49 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/21 18:59:09 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,9 +63,6 @@ template<typename TYPE, eOperandType ETYPE>
 class Operand : public IOperand
 {
 public:
-	Operand<TYPE, ETYPE>(void);
-	Operand<TYPE, ETYPE>(Operand<TYPE, ETYPE> const & src);
-
 	Operand<TYPE, ETYPE>(TYPE value) :
 		_value(value)
 	{}
@@ -86,14 +83,8 @@ public:
 		return (Operand<TYPE, ETYPE>(static_cast<TYPE>(op)).*calc)(*this);
 	}
 
-	Operand<TYPE, ETYPE> &		operator=(Operand<TYPE, ETYPE> const & rhs);
 
 	virtual int 			getPrecision( void ) const
-	{
-		return (sizeof(TYPE));
-	}
-
-	virtual eOperandType 	getType( void ) const
 	{
 		return ETYPE;
 	}
@@ -113,7 +104,7 @@ public:
 
 	virtual bool			 operator==( IOperand const & rhs ) const
 	{
-		return rhs.getType() == ETYPE && _value == static_cast<TYPE>(rhs);
+		return rhs.getPrecision() == ETYPE && _value == static_cast<TYPE>(rhs);
 	}
 
 	virtual std::string const toString( void ) const
@@ -131,6 +122,9 @@ public:
 
 
 private:
+	Operand<TYPE, ETYPE>(void);
+	Operand<TYPE, ETYPE>(Operand<TYPE, ETYPE> const & src);
+	Operand<TYPE, ETYPE> &		operator=(Operand<TYPE, ETYPE> const & rhs);
 
 	TYPE const				_value;
 };

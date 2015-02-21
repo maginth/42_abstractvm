@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/10 13:19:51 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/21 16:33:17 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/21 19:01:20 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ public:
 		IOperand &a = *_stack;
 		pop();
 		IOperand &b = *_stack;
-		if (a.getType() < b.getType())
+		if (a.getPrecision() < b.getPrecision())
 			b.upgrade(a, FUNC);
 		else
 			(a.*FUNC)(b);

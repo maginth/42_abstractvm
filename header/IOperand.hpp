@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:37:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/21 17:45:52 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/21 18:58:49 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ class IOperand {
 public:
 
 	virtual int 			getPrecision( void ) const = 0; // Precision of the type of the instance
-	virtual eOperandType 	getType( void ) const = 0; // Type of the instance
 
 	virtual IOperand const * operator+( IOperand const & rhs ) const = 0; // Sum
 	virtual IOperand const * operator-( IOperand const & rhs ) const = 0; // Difference

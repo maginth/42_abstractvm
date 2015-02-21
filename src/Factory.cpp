@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 16:46:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/21 15:30:28 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/21 18:54:56 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,14 @@ const int				Factory::eOpCodeArg[] =
 
 
 Factory::Factory(void)
-{}
+{
+	//just for the compiler to generate template classes
+	Operand<int8_t, Int8>(0);
+	Operand<int16_t, Int16>(0);
+	Operand<int32_t, Int32>(0);
+	Operand<float, Float>(0);
+	Operand<double, Double>(0);
+}
 
 
 Factory::~Factory(void)

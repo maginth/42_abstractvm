@@ -21,7 +21,7 @@ DEBUG_0 =
 BOOST = $$HOME/boost/boost_1_57_0/
 LIB = -I$(BOOST) -L$(BOOST)bin.v2/libs/regex/build/darwin-4.9.0/release/threading-multi/ -lboost_regex 
 
-CFLAGS = $(DEBUG_$(D)) -Wall -Werror -Wextra -std=c++11 $(LIB)
+CFLAGS = $(DEBUG_$(D)) -Wall -Werror -Wextra -std=c++11 $(LIB) -O3
 CC = $(SILENCE)g++
 RM = $(SILENCE)rm -rf
 

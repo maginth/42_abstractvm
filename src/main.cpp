@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/12 20:09:10 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/18 10:42:55 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/21 19:03:04 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ int 				main(int argc, char const *argv[])
 	std::ifstream		*ifs = NULL;
 	int					flag;
 	
+	flag = 0;
 	if (argc == 1)
 		print_usage(argv[0]);
 	try
