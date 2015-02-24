@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/11 12:58:22 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/21 16:34:38 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/24 18:08:19 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,14 @@
 #include <Avm.hpp>
 #include <Operand.hpp>
 
-Avm::Avm(void) : _stack_start(NULL) {}
+Avm::Avm(void) : _stack_start(NULL), _line(0) {}
 
 Avm * Avm::_assemble_mode_avm = NULL;
 
 Avm::~Avm(void)
 {
 	if (_stack_start)
-		delete _stack_start;
+		free(_stack_start);
 }
 
 void	* Avm::reserveStack(int const size)
@@ -100,7 +100,7 @@ void	Avm::assemble_mode(bool assemble_mode)
 		data_size = 0;
 		instr_size = DATA_MAX_SIZE;
 		if (_stack_start)
-			delete _stack_start;
+			free(_stack_start);
 		_stack_start = reinterpret_cast<IOperand *>(new byte[stack_size + instr_size]);
 		_instruction = reinterpret_cast<Avm::eOpcode*>(byte_shift(_stack_start, stack_size));
 		Avm::_assemble_mode_avm = this;

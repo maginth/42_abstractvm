@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/12 20:09:10 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/21 19:03:04 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/24 18:27:55 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,12 @@ int					read_flag(int & argc, char const  ** & argv)
 {
 	argc--;
 	argv++;
-	if (std::string("-o").compare(*argv) == 0)
+	static std::string const _o("-o");
+	static std::string const _b("-b");
+
+	if (_o.compare(*argv) == 0)
 		return O_FLAG;
-	if (std::string("-b").compare(*argv) == 0)
+	if (_b.compare(*argv) == 0)
 		return B_FLAG;
 	argc++;
 	argv--;
@@ -53,7 +56,7 @@ void				manage_file(char const *file,
 	}
 	catch (std::exception & e)
 	{
-		std::cout << "Avm file error : " << file << " " << e.what() << std::endl;
+		std::cerr << "Avm file error : " << file << " " << e.what() << std::endl;
 	}
 }
 
@@ -80,10 +83,11 @@ int 				main(int argc, char const *argv[])
 		print_usage(argv[0]);
 	try
 	{
-		while (--argc)
+		while (--argc > 0)
 		{
 			flag |= read_flag(argc, argv);
-			if ((flag & I_FLAG) && ((flag & (O_FLAG | B_FLAG)) || argc == 0))
+			argv++;
+			if ((flag & I_FLAG) && ((flag & (O_FLAG | B_FLAG)) || argc == 1))
 			{
 				if (!(flag & B_FLAG))
 					manage_file(*argv, ofs, ifs, flag);	
@@ -101,14 +105,12 @@ int 				main(int argc, char const *argv[])
 			}
 			else if (flag & O_FLAG)
 				manage_file(*argv, ofs, ifs, flag);
-			argc--;
-			argv++;
 		}
 		manage_file("", ofs, ifs, 0);	
 	} 
 	catch (std::exception & e)
 	{
-		std::cout << "Avm " << *argv << " " << avm.get_line() << e.what() << std::endl;
+		std::cerr << "Avm line " << avm.get_line() << " :  " << e.what() << std::endl;
 	}
 	return 0;
 }

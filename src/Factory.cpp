@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 16:46:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/21 18:54:56 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/24 18:36:04 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,10 @@
 #include <Operand.hpp>
 #include <cstdio> 
 #include <cstdlib> 
-#include <boost/lexical_cast.hpp>
-#include <boost/regex.hpp>
+#include <regex>
 #include <algorithm>
+#include <stdlib.h>
+#include <string>
 
 
 std::vector<std::string>		Factory::eOperandTypeString = 
@@ -47,11 +48,11 @@ IOperand const * Factory::readOperand( std::ifstream & s ) const
 {
 	std::string					whole_type;
 	eOperandType				res;
-	static const boost::regex 	e("^(\\d+)\\((\\d+)\\)$");
-	boost::smatch				match;
+	static const std::regex 	e("^(\\d+)\\((\\d+)\\)$");
+	std::smatch					match;
 
 	s >> whole_type;
-	if (!boost::regex_match(whole_type, match, e))
+	if (!std::regex_match(whole_type, match, e))
 		throw AvmException(whole_type + " is not a valid operand" );
 
 	res = static_cast<eOperandType>(
@@ -81,34 +82,46 @@ IOperand const * Factory::createOperand( eOperandType type, std::string const & 
 
 std::string			Factory::skipComment(std::ifstream & s) const
 {
-	std::string			res;
+	std::string 	res;
 
 	do {
 		s >> res;
-	} while (res[0] == ';' && res[1] != ';');
+	std::cout << res << std::endl;
+		if (res[0] == ' ' || res[0] == ';')
+		{
+			getline(s, res);
+	std::cout << res << std::endl;
+			continue;
+		}
+	} while (!s.eof() && res[0] == ';' && res[1] != ';');
 	if (s.eof() || (res[0] == ';' && res[1] == ';'))
 		throw EndOfInputFile();
 	return res;
 }
 
 
-Avm::eOpcode		Factory::readOpcode(std::ifstream & s ) const
+Avm::eOpcode		Factory::readOpcode(std::ifstream & s) const
 {
 	std::string			op;
 	Avm::eOpcode		res;
 	int					args;
 
-	s >> op;
+	op = skipComment(s);
+
 	res = static_cast<Avm::eOpcode>(
 			find(eOpCodeString.begin(), eOpCodeString.end(), op)
 			 - eOpCodeString.begin());
+
+	std::cout << res << std::endl;
 	if (res != Avm::CodeError)
 	{
 		args = Factory::eOpCodeArg[res];
 		while (args--)
 			readOperand(s);
+		getline(s, op);
 		return res;
 	}
+
 	throw AvmException(op + " is note a valide opcode");
 }
 
@@ -127,27 +140,37 @@ void			Factory::assemble_file(std::ifstream & s, Avm & avm, std::ofstream & ofs)
 	avm.assemble_mode(false);
 }
 
+static long	stoi_range_checked(std::string const & value, long range)
+{
+	long		res = std::stol(value);
+
+	if (abs(res) > range)
+		throw AvmException("integer out of range " + res);
+	return res;
+
+}
+
 IOperand const * Factory::createInt8( std::string const & value ) const
 {
-	return new Operand<int8_t, Int8>(boost::lexical_cast<int8_t>(value));
+	return new Operand<int8_t, Int8>(stoi_range_checked(value, 0x7f));
 }
 
 IOperand const * Factory::createInt16( std::string const & value ) const
 {
-	return new Operand<int16_t, Int16>(boost::lexical_cast<int16_t>(value));
+	return new Operand<int16_t, Int16>(stoi_range_checked(value, 0x7fff));
 }
 
 IOperand const * Factory::createInt32( std::string const & value ) const
 {
-	return new Operand<int32_t, Int32>(boost::lexical_cast<int32_t>(value));
+	return new Operand<int32_t, Int32>(stoi_range_checked(value, 0x7fffff));
 }
 
 IOperand const * Factory::createFloat( std::string const & value ) const
 {
-	return new Operand<float, Float>(boost::lexical_cast<float>(value));
+	return new Operand<float, Float>(std::stof(value));
 }
 
 IOperand const * Factory::createDouble( std::string const & value ) const
 {
-	return new Operand<double, Double>(boost::lexical_cast<double>(value));
+	return new Operand<double, Double>(std::stod(value));
 }

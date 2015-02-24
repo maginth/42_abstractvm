@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/13 11:28:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/21 14:42:01 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/24 18:27:42 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,10 @@ public:
 
 	AvmException &		operator=(AvmException const & rhs);
 
-	virtual const char * what() const noexcept;
+	virtual const char * what() const throw();
 	
 private:
-	std::string const & _msg;
+	std::string const _msg;
 };
 
 class EndOfInputFile : public AvmException
