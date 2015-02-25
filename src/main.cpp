@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/12 20:09:10 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/25 21:23:56 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/25 21:27:45 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,13 +58,11 @@ void				manage_file(char const *file,
 			delete ifs;
 		}
 		if (flag & (I_FLAG | B_FLAG))
-		{
 			ifs = new std::ifstream(file);
-			if (!ifs->good())
-				throw AvmException("file doesn't exist or can't be opened");
-		}
 		else if (flag & O_FLAG)
 			ofs = new std::ofstream(file);
+		if ((ifs && !ifs->good()) || (ofs && !ofs->good()))
+			throw AvmException("file doesn't exist or can't be opened");
 	}
 	catch (std::exception & e)
 	{
