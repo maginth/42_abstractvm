@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/11 12:58:22 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/25 18:30:18 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/25 19:28:58 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void	* Avm::reserveStack(int const size)
 	Avm		&avm = *Avm::_assemble_mode_avm;
 
 	res = avm._stack;
-	avm._stack += size;
+	avm._stack = byte_shift(avm._stack, size);
 	if (avm._stack > avm._stack_end)
 		throw AvmException("Avm stack overflow");
 	return res;
@@ -48,9 +48,11 @@ void	Avm::push()
 	int	op_size;
 
 	op_size = _data_segment->opSize();
-	*_stack = *_data_segment;
+	memcpy(_stack, _data_segment, op_size);
 	_data_segment = byte_shift(_data_segment, op_size);
 	_stack = byte_shift(_stack, op_size);
+	if (_stack > _stack_end)
+		throw AvmException("Avm stack overflow");
 }
 
 void	Avm::print()
@@ -112,9 +114,10 @@ void	Avm::assemble_mode(bool assemble_mode)
 	else
 	{
 		stack_size = _line * sizeof(Operand<double, Double>);
-		data_size = _stack - _stack_start;
+		data_size = (byte *)_stack - (byte *)_stack_start;
 		instr_size = _line * sizeof(_instruction);
-		memmove(_instruction, _stack + stack_size, instr_size);
+		memmove(byte_shift(_stack_start, stack_size), _stack_start, data_size);
+		memmove(byte_shift(_stack_start, stack_size + data_size), _instruction, instr_size);
 		_stack_start = reinterpret_cast<IOperand *>(realloc(_stack_start, stack_size + data_size + instr_size));
 	}
 	_line = 0;

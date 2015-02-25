@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/12 20:09:10 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/25 18:19:04 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/25 21:23:56 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,15 +18,23 @@
 
 int					read_flag(int & argc, char const  ** & argv)
 {
-	argc--;
-	argv++;
 	static std::string const _o("-o");
 	static std::string const _b("-b");
+	static std::string const _u("--usage");
 
+	if (argc == 1)
+		return 0;
+	argc--;
+	argv++;
 	if (_o.compare(*argv) == 0)
 		return O_FLAG;
 	if (_b.compare(*argv) == 0)
 		return B_FLAG;
+	if (_u.compare(*argv) == 0)
+	{
+		std::cout <<"Usage : ./avm [-o file.bytecode] [file.avm] [-b file.bytecode]" << std::endl;
+		exit(0);
+	}
 	argc++;
 	argv--;
 	return I_FLAG;
@@ -50,25 +58,22 @@ void				manage_file(char const *file,
 			delete ifs;
 		}
 		if (flag & (I_FLAG | B_FLAG))
+		{
 			ifs = new std::ifstream(file);
+			if (!ifs->good())
+				throw AvmException("file doesn't exist or can't be opened");
+		}
 		else if (flag & O_FLAG)
 			ofs = new std::ofstream(file);
 	}
 	catch (std::exception & e)
 	{
-		std::cerr << "Avm file error : " << file << " " << e.what() << std::endl;
+		std::cerr << "Avm file error : " << file << " -> " << e.what() << std::endl;
+		exit(-1);
 	}
 }
 
-void				print_usage(char const *name)
-{
-	std::cout 
-	<< "Usage : "
-	<< name
-	<< " [-o file.bytecode] [file.avm] [-b file.bytecode]" 
-	<< std::endl;
-	exit(-1);
-}
+
 
 int 				main(int argc, char const *argv[])
 {
@@ -77,36 +82,29 @@ int 				main(int argc, char const *argv[])
 	std::ofstream		*ofs = NULL;
 	std::ifstream		*ifs = NULL;
 	int					flag;
+	int					f;
 	
 	flag = 0;
-	if (argc == 1)
-		print_usage(argv[0]);
 	try
 	{
-		while (--argc > 0)
+		while (argc > 0)
 		{
-			flag |= read_flag(argc, argv);
+			f = read_flag(argc, argv);
+			argc--;
 			argv++;
-			if ((flag & I_FLAG) && ((flag & (O_FLAG | B_FLAG)) || argc == 1))
+			if (((f & (I_FLAG | B_FLAG)) && ifs) || argc == 0) //there is a file waiting or no more file
 			{
-				if (!(flag & B_FLAG))
-					manage_file(*argv, ofs, ifs, flag);	
-				factory.assemble_file(*ifs, avm, ofs);
-				if (!(flag & O_FLAG))
+				if ((flag & B_FLAG))
+					avm.loadBinary(*ifs);
+				else
+					factory.assemble_file(ifs ? *ifs : std::cin, avm, ofs);
+				if (!ofs)
 					avm.run();
-				flag &= ~(O_FLAG | I_FLAG);
+				flag = 0;
 			}
-			if (flag & B_FLAG)
-			{
-				manage_file(*argv, ofs, ifs, flag);
-				avm.loadBinary(*ifs);
-				avm.run();
-				flag &= ~B_FLAG;
-			}
-			else if (flag & O_FLAG)
-				manage_file(*argv, ofs, ifs, flag);
+			flag |= f;
+			manage_file(*argv, ofs, ifs, f);
 		}
-		manage_file("", ofs, ifs, 0);	
 	} 
 	catch (std::exception & e)
 	{

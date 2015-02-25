@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/10 13:19:51 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/24 16:34:27 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/25 19:23:50 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,8 +65,6 @@ public:
 	
 private:
 
-	IOperand * byte_shift(IOperand * ref, int shift) const;
-
 	IOperand	*_stack;
 	IOperand	*_stack_start;
 	IOperand	*_stack_end;
@@ -81,7 +79,7 @@ private:
 
 std::ostream &	operator<<(std::ostream & stream, Avm const & s);
 
-inline IOperand * Avm::byte_shift(IOperand * ref, int shift) const
+inline IOperand * byte_shift(IOperand * ref, int shift)
 {
 	return reinterpret_cast<IOperand *>(reinterpret_cast<byte *>(ref) + shift);
 }

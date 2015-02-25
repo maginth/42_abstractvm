@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:43:15 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/25 18:17:16 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/25 19:49:05 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ public:
 	Factory(void);
 	virtual ~Factory(void);
 
-	void			assemble_file(std::ifstream & s, Avm & avm, std::ofstream * ofs) const;
+	void			assemble_file(std::istream & s, Avm & avm, std::ofstream * ofs) const;
 	
 private:
 
@@ -48,7 +48,7 @@ private:
 	IOperand const * createDouble( std::string const & value ) const;
 
 	void			readOperand( std::string s, int const nb_arg ) const;
-	Avm::eOpcode	match_line( std::ifstream & s ) const;
+	Avm::eOpcode	match_line( std::istream & s ) const;
 	Avm::eOpcode	readOpcode( std::smatch & m ) const;
 
 	Factory(Factory const & src);

@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 16:46:20 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/25 18:19:14 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/25 20:00:06 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ IOperand const * Factory::createOperand(eOperandType type, std::string const & v
 	return (this->*(create_func[type]))(value);
 }
 
-Avm::eOpcode			Factory::match_line(std::ifstream & s) const
+Avm::eOpcode			Factory::match_line(std::istream & s) const
 {
 	std::string 			line;
 	static std::regex const reg("^\\s*(\\w*)\\s*([^;]*)(;?;?)");
@@ -117,7 +117,7 @@ Avm::eOpcode		Factory::readOpcode(std::smatch & m) const
 }
 
 
-void			Factory::assemble_file(std::ifstream & s, Avm & avm, std::ofstream * ofs) const
+void			Factory::assemble_file(std::istream & s, Avm & avm, std::ofstream * ofs) const
 {
 	avm.assemble_mode(true);
 	try
