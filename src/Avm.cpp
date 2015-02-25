@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/11 12:58:22 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/24 18:08:19 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/25 18:30:18 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,10 @@ void	Avm::assert()
 	
 }
 
+/*
+** Memory Representation of different segment :
+** _stack [_stack_size] :: _data_segment[_data_size] :: _instruction[instr_size]
+*/
 
 void	Avm::assemble_mode(bool assemble_mode)
 {
@@ -110,7 +114,7 @@ void	Avm::assemble_mode(bool assemble_mode)
 		stack_size = _line * sizeof(Operand<double, Double>);
 		data_size = _stack - _stack_start;
 		instr_size = _line * sizeof(_instruction);
-		memmove(_instruction, _stack + stack_size + data_size, instr_size);
+		memmove(_instruction, _stack + stack_size, instr_size);
 		_stack_start = reinterpret_cast<IOperand *>(realloc(_stack_start, stack_size + data_size + instr_size));
 	}
 	_line = 0;
@@ -126,8 +130,8 @@ void	Avm::saveBinary(std::ofstream & ofs) const
 	data_size = _stack - _stack_start;
 	ofs.write(reinterpret_cast<const char *>(&_line), sizeof(int));
 	ofs.write(reinterpret_cast<const char *>(&data_size), sizeof(int));
-	ofs.write(reinterpret_cast<const char *>(_instruction), _line * sizeof(_instruction));
 	ofs.write(reinterpret_cast<const char *>(_stack_start), data_size);
+	ofs.write(reinterpret_cast<const char *>(_instruction), _line * sizeof(_instruction));
 	ofs.close();
 }
 
@@ -146,8 +150,8 @@ void	Avm::loadBinary(std::ifstream & ifs)
 	_stack = _stack_start = reinterpret_cast<IOperand *>(new byte[stack_size + data_size + instr_size]);
 	_data_segment = _stack_end = byte_shift(_stack_start, stack_size);
 	_instruction = reinterpret_cast<Avm::eOpcode*>(byte_shift(_data_segment, data_size));
-	ifs.read(reinterpret_cast<char *>(_instruction), instr_size);
 	ifs.read(reinterpret_cast<char *>(_data_segment), data_size);
+	ifs.read(reinterpret_cast<char *>(_instruction), instr_size);
 	ifs.close();
 }
 

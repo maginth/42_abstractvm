@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/12 20:09:10 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/24 18:27:55 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/25 18:19:04 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ int 				main(int argc, char const *argv[])
 			{
 				if (!(flag & B_FLAG))
 					manage_file(*argv, ofs, ifs, flag);	
-				factory.assemble_file(*ifs, avm, *ofs);
+				factory.assemble_file(*ifs, avm, ofs);
 				if (!(flag & O_FLAG))
 					avm.run();
 				flag &= ~(O_FLAG | I_FLAG);

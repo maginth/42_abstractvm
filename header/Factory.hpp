@@ -6,7 +6,7 @@
 /*   By: mguinin <mguinin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/09 14:43:15 by mguinin           #+#    #+#             */
-/*   Updated: 2015/02/21 15:30:39 by mguinin          ###   ########.fr       */
+/*   Updated: 2015/02/25 18:17:16 by mguinin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <regex>
 
 class Factory;
 typedef IOperand const * (Factory::*t_create_func)(std::string const & value) const;
@@ -32,8 +33,7 @@ public:
 	Factory(void);
 	virtual ~Factory(void);
 
-
-	void			assemble_file(std::ifstream & s, Avm & avm, std::ofstream & ofs) const;
+	void			assemble_file(std::ifstream & s, Avm & avm, std::ofstream * ofs) const;
 	
 private:
 
@@ -47,9 +47,9 @@ private:
 	IOperand const * createFloat( std::string const & value ) const;
 	IOperand const * createDouble( std::string const & value ) const;
 
-	IOperand const * readOperand( std::ifstream & s ) const;
-	std::string		skipComment(std::ifstream & s) const;
-	Avm::eOpcode	readOpcode(std::ifstream & s ) const;
+	void			readOperand( std::string s, int const nb_arg ) const;
+	Avm::eOpcode	match_line( std::ifstream & s ) const;
+	Avm::eOpcode	readOpcode( std::smatch & m ) const;
 
 	Factory(Factory const & src);
 	Factory &		operator=(Factory const & rhs);
