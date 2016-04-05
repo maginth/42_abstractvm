@@ -18,8 +18,10 @@
 #include <AvmException.hpp>
 #include <IOperand.hpp>
 #include <string.h>
+#include <vector>
 
 #define DATA_MAX_SIZE 10000000
+#define B_SIZE 16
 typedef unsigned char byte;
 
 class Avm;
@@ -31,6 +33,8 @@ public:
 	Avm(void);
 	Avm(Avm const & src);
 	virtual ~Avm(void);
+
+	static std::vector<std::string>		eOperandString;
 
 	enum eOpcode {Push, Pop, Dump, Assert, Add, Sub, Mul, Div, Mod, Print, Exit, CodeError};	
 
@@ -45,7 +49,6 @@ public:
 	void					assert(void);
 	void					print(void);
 	int const &				get_line(void);
-	void					write_instruction(eOpcode opcode);
 
 	template<IOperand const * (IOperand::*FUNC)(IOperand const &) const>
 	void 					binary_op()
@@ -54,15 +57,20 @@ public:
 		IOperand &a = *_stack;
 		pop();
 		IOperand &b = *_stack;
-		if (a.getPrecision() < b.getPrecision())
-			b.upgrade(a, FUNC);
+		if (b.getPrecision() < a.getPrecision())
+			a.upgrade(b, FUNC);
 		else
-			(a.*FUNC)(b);
+			(b.*FUNC)(a);
 	}
 
 	void					saveBinary(std::ofstream & ofs) const;
 	void					loadBinary(std::ifstream & ifs);
-	
+
+	inline void	write_instruction(Avm::eOpcode opcode)
+	{
+		_instruction[_line++] = opcode;
+	}
+
 private:
 
 	IOperand	*_stack;
@@ -78,15 +86,5 @@ private:
 };
 
 std::ostream &	operator<<(std::ostream & stream, Avm const & s);
-
-inline IOperand * byte_shift(IOperand * ref, int shift)
-{
-	return reinterpret_cast<IOperand *>(reinterpret_cast<byte *>(ref) + shift);
-}
-
-inline void	Avm::write_instruction(Avm::eOpcode opcode)
-{
-	_instruction[_line++] = opcode;
-}
 
 #endif // AVM_HPP

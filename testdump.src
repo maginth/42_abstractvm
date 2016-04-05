@@ -1,0 +1,18 @@
+push int8(56)
+push double(4.12345678)
+add
+push int16(256)
+push float(256.0)
+sub
+push int32(42)
+push int8(10)
+mod
+push int8(100)
+push int8(3)
+mul
+push float(1)
+push double(7)
+div
+dump
+exit
+;;

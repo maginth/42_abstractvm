@@ -3,9 +3,9 @@ IPATH = ./header/
 SPATH = ./src/
 OPATH = ./obj/
 SRCS = main.cpp \
+		Factory.cpp \
 		Avm.cpp \
 		AvmException.cpp \
-		Factory.cpp \
 
 V ?= 0
 

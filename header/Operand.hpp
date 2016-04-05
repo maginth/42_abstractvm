@@ -15,10 +15,9 @@
 
 
 #include <iostream>
+#include <string>
 #include <IOperand.hpp>
 #include <Avm.hpp>
-#include <Factory.hpp>
-#include <sstream>
 #include <math.h>
 
 #define CAST(T) \
@@ -39,25 +38,15 @@ inline T mod(T const a, T const b)
 	return a % b;
 }
 
-template<>
 inline double mod(double const a, double const b)
 {
 	return fmod(a, b);
 }
 
-template<>
 inline float mod(float const a, float const b)
 {
 	return fmod(a, b);
 }
-
-#define OPERATOR_DIV(X)	\
-	virtual IOperand const * operator X ( IOperand const & rhs ) const		\
-	{																		\
-		if (static_cast<const TYPE>(rhs) == static_cast<TYPE>(0))			\
-			throw AvmException("second operand of "#X" is 0");				\
-		return new Operand<TYPE, ETYPE>(mod(_value, static_cast<const TYPE>(rhs)));\
-	}
 
 template<typename TYPE, eOperandType ETYPE>
 class Operand : public IOperand
@@ -69,7 +58,8 @@ public:
 
 	void *				operator new(std::size_t size)
 	{
-		return Avm::reserveStack(size);
+		(void)(size);
+		return Avm::reserveStack(B_SIZE);
 	}
 
 	virtual ~Operand<TYPE, ETYPE>(void)
@@ -98,21 +88,34 @@ public:
 	OPERATOR(+)
 	OPERATOR(-)
 	OPERATOR(*)
-	OPERATOR_DIV(/)
-	OPERATOR_DIV(%)
-	
+
+	virtual IOperand const * operator / ( IOperand const & rhs ) const
+	{
+		if (static_cast<const TYPE>(rhs) == static_cast<TYPE>(0))
+			throw AvmException("second operand of / is 0");
+		return new Operand<TYPE, ETYPE>(_value / static_cast<const TYPE>(rhs));
+	}
+
+	virtual IOperand const * operator % ( IOperand const & rhs ) const
+	{
+		if (static_cast<const TYPE>(rhs) == static_cast<TYPE>(0))
+			throw AvmException("second operand of %% is 0");
+		return new Operand<TYPE, ETYPE>(mod(_value, static_cast<const TYPE>(rhs)));
+	}
 
 	virtual bool			 operator==( IOperand const & rhs ) const
 	{
 		return rhs.getPrecision() == ETYPE && _value == static_cast<TYPE>(rhs);
 	}
 
+	virtual const void * getValue( void ) const
+	{
+		return &_value;
+	}
+
 	virtual std::string const toString( void ) const
 	{
-		std::stringstream	res;
-
-		res << _value;
-		return (res.str());
+		return (Avm::eOperandString[ETYPE] + '(' + std::to_string(_value) + ')');
 	}
 
 	virtual  int		 		opSize( void ) const

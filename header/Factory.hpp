@@ -14,7 +14,6 @@
 #define FACTORY_HPP
 #include <AvmException.hpp>
 #include <IOperand.hpp>
-#include <Operand.hpp>
 #include <Avm.hpp>
 #include <vector>
 #include <iostream>
@@ -26,7 +25,6 @@ typedef IOperand const * (Factory::*t_create_func)(std::string const & value) co
 
 class Factory {
 public:
-	static std::vector<std::string>		eOperandTypeString;
 	static std::vector<std::string>		eOpCodeString;
 	static const int							eOpCodeArg[];
 

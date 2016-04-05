@@ -13,6 +13,15 @@
 
 #include <Avm.hpp>
 #include <Operand.hpp>
+#include <fstream>
+
+std::vector<std::string>		Avm::eOperandString = 
+	{"int8", "int16", "int32", "float", "double"};
+
+inline IOperand * byte_shift(IOperand * ref, int shift)
+{
+	return reinterpret_cast<IOperand *>(reinterpret_cast<byte *>(ref) + shift);
+}
 
 Avm::Avm(void) : _stack_start(NULL), _line(0) {}
 
@@ -26,51 +35,57 @@ Avm::~Avm(void)
 
 void	* Avm::reserveStack(int const size)
 {
-	void	*res;
 	Avm		&avm = *Avm::_assemble_mode_avm;
+	void	*res;
 
 	res = avm._stack;
-	avm._stack = byte_shift(avm._stack, size);
-	if (avm._stack > avm._stack_end)
+	if (avm._stack >= avm._stack_end)
 		throw AvmException("Avm stack overflow");
+	avm._stack = byte_shift(avm._stack, size);
 	return res;
 }
 
 void	Avm::pop()
 {
-	_stack = byte_shift(_stack, -_stack->opSize());
-	if (_stack < _stack_start)
+	if (_stack <= _stack_start)
 		throw AvmException("Pop on empty stack");
+	_stack = byte_shift(_stack, -B_SIZE);
 }
 
 void	Avm::push()
 {
-	int	op_size;
-
-	op_size = _data_segment->opSize();
-	memcpy(_stack, _data_segment, op_size);
-	_data_segment = byte_shift(_data_segment, op_size);
-	_stack = byte_shift(_stack, op_size);
-	if (_stack > _stack_end)
+	if (_stack >= _stack_end)
 		throw AvmException("Avm stack overflow");
+	memcpy(_stack, _data_segment, B_SIZE);
+	_stack = byte_shift(_stack, B_SIZE);
+	_data_segment = byte_shift(_data_segment, B_SIZE);
 }
 
 void	Avm::print()
 {
-	std::cout << _stack->toString() << std::endl;
+	IOperand	*op;
+	int			type;
+	static std::string		tlist[]{"int8", "int16", "int32", "float", "double"};
+
+	op = byte_shift(_stack, -B_SIZE);
+	type = op->getPrecision();
+	if (type != Int8)
+		throw AvmException("print error: "
+			+ tlist[type]
+			+ " should be int8");
+	std::cout << *reinterpret_cast<const char *>(op->getValue());
 }
 
 void	Avm::dump()
 {
-	IOperand	*save;
+	IOperand	*i;
 
-	save = _stack;
-	while (_stack > _stack_start)
+	i = _stack;
+	while (i > _stack_start)
 	{
-		pop();
-		print();
+		i = byte_shift(i, -B_SIZE);
+		std::cout << i->toString() << std::endl;
 	}
-	_stack = save;
 }
 
 void	Avm::assert()
@@ -84,7 +99,7 @@ void	Avm::assert()
 	_stack = a;
 	push();
 	if (!(*a == *b))
-		throw AvmException("Assert fail :" + a->toString() + " != " + b->toString());
+		throw AvmException("Assert fail " + a->toString() + " != " + b->toString());
 	pop();
 	
 }
@@ -108,13 +123,12 @@ void	Avm::assemble_mode(bool assemble_mode)
 		if (_stack_start)
 			free(_stack_start);
 		_stack_start = reinterpret_cast<IOperand *>(new byte[stack_size + instr_size]);
-		_instruction = reinterpret_cast<Avm::eOpcode*>(byte_shift(_stack_start, stack_size));
 		Avm::_assemble_mode_avm = this;
 	}
 	else
 	{
 		stack_size = _line * sizeof(Operand<double, Double>);
-		data_size = (byte *)_stack - (byte *)_stack_start;
+		data_size = reinterpret_cast<byte *>(_stack) - reinterpret_cast<byte *>(_stack_start);
 		instr_size = _line * sizeof(_instruction);
 		memmove(byte_shift(_stack_start, stack_size), _stack_start, data_size);
 		memmove(byte_shift(_stack_start, stack_size + data_size), _instruction, instr_size);
@@ -130,12 +144,11 @@ void	Avm::saveBinary(std::ofstream & ofs) const
 {
 	int	data_size;
 
-	data_size = _stack - _stack_start;
-	ofs.write(reinterpret_cast<const char *>(&_line), sizeof(int));
-	ofs.write(reinterpret_cast<const char *>(&data_size), sizeof(int));
+	data_size = reinterpret_cast<const char *>(_stack) - reinterpret_cast<const char *>(_stack_start);
+	ofs << _line;
+	ofs << data_size;
 	ofs.write(reinterpret_cast<const char *>(_stack_start), data_size);
-	ofs.write(reinterpret_cast<const char *>(_instruction), _line * sizeof(_instruction));
-	ofs.close();
+	ofs.write(reinterpret_cast<const char *>(_instruction), _line * sizeof(*_instruction));
 }
 
 void	Avm::loadBinary(std::ifstream & ifs)
@@ -144,10 +157,10 @@ void	Avm::loadBinary(std::ifstream & ifs)
 	int	data_size;
 	int	instr_size;
 
-	ifs.read(reinterpret_cast<char *>(&_line), sizeof(int));
-	ifs.read(reinterpret_cast<char *>(&data_size), sizeof(int));
-	stack_size = _line * sizeof(Operand<double, Double>);
-	instr_size = _line * sizeof(_instruction);
+	ifs >> _line;
+	ifs >> data_size;
+	stack_size = _line * B_SIZE;
+	instr_size = _line * sizeof(*_instruction);
 	if (_stack_start)
 		delete _stack_start;
 	_stack = _stack_start = reinterpret_cast<IOperand *>(new byte[stack_size + data_size + instr_size]);
@@ -155,7 +168,6 @@ void	Avm::loadBinary(std::ifstream & ifs)
 	_instruction = reinterpret_cast<Avm::eOpcode*>(byte_shift(_data_segment, data_size));
 	ifs.read(reinterpret_cast<char *>(_data_segment), data_size);
 	ifs.read(reinterpret_cast<char *>(_instruction), instr_size);
-	ifs.close();
 }
 
 int const &		Avm::get_line()
@@ -187,6 +199,8 @@ void		Avm::run()
 		(this->*(instr_list[*(_instruction++)]))();
 		_line++;
 	}
+	if (*_instruction == CodeError)
+		throw AvmException("program terminated without exit call");
 	if (*_instruction != Exit)
 		throw AvmException("corrupt file : invalide binary operation");
 }

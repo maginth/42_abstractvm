@@ -33,6 +33,7 @@ public:
 	) const = 0;
 
 	virtual std::string const toString( void ) const = 0; // String representation of the instance
+	virtual const void * getValue( void ) const = 0;
 	virtual  int				opSize( void ) const = 0;
 	virtual ~IOperand( void ) {};
 

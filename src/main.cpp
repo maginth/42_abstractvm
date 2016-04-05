@@ -51,12 +51,16 @@ void				manage_file(char const *file,
 		{
 			ofs->close();
 			delete ofs;
+			ofs = NULL;
 		}
 		if (ifs)
 		{
 			ifs->close();
 			delete ifs;
+			ifs = NULL;
 		}
+		if (flag && !file)
+			throw AvmException("no file specified");
 		if (flag & (I_FLAG | B_FLAG))
 			ifs = new std::ifstream(file);
 		else if (flag & O_FLAG)
@@ -92,7 +96,7 @@ int 				main(int argc, char const *argv[])
 			argv++;
 			if (((f & (I_FLAG | B_FLAG)) && ifs) || argc == 0) //there is a file waiting or no more file
 			{
-				if ((flag & B_FLAG))
+				if ((flag & B_FLAG) && ifs)
 					avm.loadBinary(*ifs);
 				else
 					factory.assemble_file(ifs ? *ifs : std::cin, avm, ofs);
@@ -101,12 +105,13 @@ int 				main(int argc, char const *argv[])
 				flag = 0;
 			}
 			flag |= f;
-			manage_file(*argv, ofs, ifs, f);
+			manage_file(argc > 0 ? *argv : NULL, ofs, ifs, f);
 		}
 	} 
 	catch (std::exception & e)
 	{
-		std::cerr << "Avm line " << avm.get_line() << " :  " << e.what() << std::endl;
+		std::cerr << "Avm line " << (avm.get_line() + 1) << " :  " << e.what() << std::endl;
+		return -1;
 	}
 	return 0;
 }

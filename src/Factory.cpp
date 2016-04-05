@@ -10,7 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-
+#if (__GNUC__ * 100 + __GNUC_MINOR__) < 409
+	#error "GCC version must be greater or equal to 4.9.0 for std::regex"
+#endif
 #include <Factory.hpp>
 #include <Operand.hpp>
 #include <cstdio> 
@@ -19,9 +21,6 @@
 #include <stdlib.h>
 #include <string>
 
-
-std::vector<std::string>		Factory::eOperandTypeString = 
-	{"int8", "int16", "int32", "float", "double"};
 std::vector<std::string>		Factory::eOpCodeString = 
 	{"push", "pop", "dump", "assert", "add", "sub", "mul", "div", "mod", "print", "exit"};
 const int				Factory::eOpCodeArg[] =
@@ -47,11 +46,6 @@ static inline int			indexOf(std::vector<std::string> & v, std::string s)
 	return std::find(v.begin(), v.end(), s) - v.begin();
 }
 
-static inline std::string	mstr(std::smatch & m, int index)
-{
-	return std::string(m[index].first, m[index].second);
-}
-
 void			 Factory::readOperand(std::string s, int const nb_arg) const
 {
 	eOperandType				type;
@@ -61,13 +55,13 @@ void			 Factory::readOperand(std::string s, int const nb_arg) const
 	if (!std::regex_match(s, m, reg))
 		throw AvmException(s + " is not a valid operand" );
 
-	type = static_cast<eOperandType>(indexOf(eOperandTypeString, mstr(m, 1)));
+	type = static_cast<eOperandType>(indexOf(Avm::eOperandString, m.str(1)));
 
 	if (type == TypeError)
-		throw AvmException(mstr(m ,1) + " is note a valide type");
-	createOperand(type, mstr(m, 2));
+		throw AvmException(m.str(1) + " is note a valide type");
+	createOperand(type, m.str(2));
 	if (nb_arg > 1)
-		readOperand(mstr(m, 3), nb_arg - 1);
+		readOperand(m.str(3), nb_arg - 1);
 }
 
 IOperand const * Factory::createOperand(eOperandType type, std::string const & value ) const
@@ -86,17 +80,16 @@ IOperand const * Factory::createOperand(eOperandType type, std::string const & v
 Avm::eOpcode			Factory::match_line(std::istream & s) const
 {
 	std::string 			line;
-	static std::regex const reg("^\\s*(\\w*)\\s*([^;]*)(;?;?)");
+	static std::regex const reg("^\\s*(\\w*)\\s*([^;]*)(;?;?).*");
 	std::smatch				m;
 
 	getline(s, line);
-	std::regex_match(line, m, reg);
-	if (m[1].first == m[1].second && m[2].first != m[2].second)
+	if (!std::regex_match(line, m, reg))
 		throw AvmException("Syntaxe error : " + line);
-	if (m[1].first != m[1].second)
-		return readOpcode(m);
-	if (s.eof() || (m[3].first - m[3].second) == 2)
+	if (s.eof() || m[3].compare(";;") == 0)
 		throw EndOfInputFile();
+	if (!m.str(1).empty())
+		return readOpcode(m);
 	return match_line(s);
 }
 
@@ -106,13 +99,13 @@ Avm::eOpcode		Factory::readOpcode(std::smatch & m) const
 	Avm::eOpcode		res;
 	int					nb_arg;
 
-	res = static_cast<Avm::eOpcode>(indexOf(eOpCodeString, mstr(m, 1)));
+	res = static_cast<Avm::eOpcode>(indexOf(eOpCodeString, m.str(1)));
 
 	if (res == Avm::CodeError)
-		throw AvmException(mstr(m, 1) + " is note a valide opcode");
+		throw AvmException(m.str(1) + " is note a valide operation");
 	nb_arg = Factory::eOpCodeArg[res];
 	if (nb_arg > 0)
-		readOperand(mstr(m, 2), nb_arg);
+		readOperand(m.str(2), nb_arg);
 	return res;
 }
 
@@ -126,10 +119,13 @@ void			Factory::assemble_file(std::istream & s, Avm & avm, std::ofstream * ofs) 
 			avm.write_instruction(match_line(s));
 	}
 	catch(EndOfInputFile &e)
-	{}
+	{
+		avm.write_instruction(Avm::CodeError);
+	}
 	if (ofs)
 		avm.saveBinary(*ofs);
-	avm.assemble_mode(false);
+	else
+		avm.assemble_mode(false);
 }
 
 static long		stoi_range_checked(std::string const & value, long range)
@@ -137,7 +133,7 @@ static long		stoi_range_checked(std::string const & value, long range)
 	long		res = std::stol(value);
 
 	if (abs(res) > range)
-		throw AvmException("integer out of range " + res);
+		throw AvmException("integer out of range " + value);
 	return res;
 
 }
